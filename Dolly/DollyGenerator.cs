@@ -19,6 +19,7 @@ namespace Dolly;
  * Property without set
  * Handle null values
  * Structs
+ * CloneConstructorAttribute
  */
 
 [Generator]
@@ -159,7 +160,7 @@ public class DollyGenerator : IIncrementalGenerator
     {
         public string Name { get; }
         public bool IsClonable { get; }
-        public Func<string, string>? Transform { get; }
+        public Func<string, bool, string>? Transform { get; }
 
         public Member(string name, ITypeSymbol symbol)
         {
@@ -176,21 +177,20 @@ public class DollyGenerator : IIncrementalGenerator
 
         }
 
-        private static bool TryGetTransform(ITypeSymbol symbol, out Func<string, string> transform, out ITypeSymbol elementType)
+        private static bool TryGetTransform(ITypeSymbol symbol, out Func<string, bool, string> transform, out ITypeSymbol elementType)
         {
             // Handle Array and IEnumerable<T>
             if (symbol is IArrayTypeSymbol arrayTypeSymbol)                
             {
-                transform = (name) => $"{name}.Select(item => item.Clone()).ToArray()";
+                transform = (name, clone) => $"{name}.Select(item => item{(clone ? ".Clone()" : "")}).ToArray()";
                 elementType = arrayTypeSymbol.ElementType;
                 return true;
             }
             if (symbol is INamedTypeSymbol namedSymbol && namedSymbol.IsGenericIEnumerable())
             {
-                transform = (name) => $"{name}.Select(item => item.Clone()).ToArray()";
+                transform = (name, clone) => $"{name}.Select(item => item{(clone ? ".Clone()" : "")}).ToArray()";
                 elementType = namedSymbol.TypeArguments[0];
                 return true;
-
             }
 
             // Handle types that implement IEnumerable<T> and take IEnumerable<T> as constructor parameter (ConcurrentQueue<T>, List<T>, ConcurrentStack<T> and LinkedList<T>)
@@ -201,7 +201,7 @@ public class DollyGenerator : IIncrementalGenerator
                 c.Parameters[0].Type.TryGetIEnumerableType(out var constructorEnumerableType) &&
                 SymbolEqualityComparer.Default.Equals(enumerableType, constructorEnumerableType)))
             {
-                transform = (name) => $"new {symbol.GetFullTypeName()}({name}.Select(item => item.Clone()))";
+                transform = (name, clone) => $"new {symbol.GetFullTypeName()}({name}.Select(item => item{(clone ? ".Clone()" : "")}))";
                 elementType = enumerableType;
                 return true;
             }
@@ -212,12 +212,12 @@ public class DollyGenerator : IIncrementalGenerator
 
         public string ToString(bool deepClone)
         {
-            if (IsClonable && deepClone)
+            if (Transform != null)
             {
-                if (Transform != null)
-                {
-                    return Transform(Name);
-                }
+                return Transform(Name, IsClonable && deepClone);
+            }
+            if (IsClonable && deepClone)
+            { 
                 return $"{Name}.Clone()";
             }
 
