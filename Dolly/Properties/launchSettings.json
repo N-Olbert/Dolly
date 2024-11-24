@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Debug source generator": {
+      "commandName": "DebugRoslynComponent",
+      "targetProject": "..\\Dolly.Exmaple\\Dolly.Exmaple.csproj"
+    }
+  }
+}
