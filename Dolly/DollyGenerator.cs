@@ -16,6 +16,7 @@ namespace Dolly;
  * Inheritance
  * IgnoreAttribute
  * Private set only (should not be a problem)
+ * Property without set
  * Handle null values
  * Structs
  */
