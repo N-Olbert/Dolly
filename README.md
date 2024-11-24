@@ -34,3 +34,37 @@ Generate c# code to clone objects on the fly.
 * Add the `Dolly` nuget and add `[Clonable]` attribute to a class and ensure that the class is marked as `partial`.
 * Add `[CloneIgnore]` to any property or field that you don't want to include in the clone.
 * Call `Clone()` or `ShallowClone()` on the object.
+
+### Example
+```C#
+[Clonable]
+public partial class SimpleClass
+{
+    public string First { get; set; }
+    public int Second { get; set; }
+    [CloneIgnore]
+    public float DontClone { get; set; }
+}
+```
+Should generate
+```C#
+partial class SimpleClass : IClonable<SimpleClass>
+{
+    
+    object ICloneable.Clone() => this.Clone();
+
+    public SimpleClass Clone() =>
+        new SimpleClass()
+        {
+            First = First,
+            Second = Second
+        };
+
+    public SimpleClass ShallowClone() =>
+        new SimpleClass()
+        {
+            First = First,
+            Second = Second
+        };
+}
+```
