@@ -17,6 +17,7 @@ namespace Dolly;
  * IgnoreAttribute
  * Private set only (should not be a problem)
  * Handle null values
+ * Structs
  */
 
 [Generator]
