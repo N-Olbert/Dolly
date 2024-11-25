@@ -1,0 +1,16 @@
+# top-most EditorConfig file
+root = true
+
+[*]
+end_of_line = crlf
+charset = utf-8
+tab_width = 4
+indent_size = 4
+indent_style = space
+
+[*.csproj,*.cs]
+trim_trailing_whitespace = true
+
+[*.md]
+indent_size = 2
+insert_final_newline = true

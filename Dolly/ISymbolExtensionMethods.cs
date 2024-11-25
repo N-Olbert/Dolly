@@ -4,8 +4,10 @@ namespace Dolly;
 
 public static class ISymbolExtensionMethods
 {
+    public static string GetNamespace(this ISymbol symbol) => symbol.ContainingNamespace.ToCodeString();
+
     public static bool HasAttribute(this ISymbol symbol, string name, string @namespace = "Dolly") =>
-        symbol.GetAttributes().Any(a => a.AttributeClass != null && a.AttributeClass.ContainingNamespace.ToCodeString() == @namespace && a.AttributeClass.Name == name);
+        symbol.GetAttributes().Any(a => a.AttributeClass != null && a.AttributeClass.GetNamespace() == @namespace && a.AttributeClass.Name == name);
 
     public static bool TryGetIEnumerableType(this ISymbol symbol, out ITypeSymbol enumerableType)
     {
@@ -38,14 +40,14 @@ public static class ISymbolExtensionMethods
     public static bool IsClonable(this ITypeSymbol typeSymbol) =>
         typeSymbol.HasAttribute("ClonableAttribute") || typeSymbol.AllInterfaces.Any(i => i.Name == "IClone");
 
-    public static string GetFullTypeName(this ITypeSymbol symbol)
+    public static string GetFullName(this ISymbol symbol)
     {
         if (symbol is INamedTypeSymbol namedSymbol)
         {
-            return $"{symbol.ContainingNamespace.ToCodeString()}.{symbol.Name}{(namedSymbol.IsGenericType ? $"<{string.Join(", ", namedSymbol.TypeArguments.Select(ta => ta.GetFullTypeName()))}>" : "")}";
+            return $"{symbol.GetNamespace()}.{symbol.Name}{(namedSymbol.IsGenericType ? $"<{string.Join(", ", namedSymbol.TypeArguments.Select(ta => ta.GetFullName()))}>" : "")}";
 
         }
-        return $"{symbol.ContainingNamespace.ToCodeString()}.{symbol.Name}";
+        return $"{symbol.GetNamespace()}.{symbol.Name}";
     }
 
     public static bool IsGenericIEnumerable(this ISymbol symbol) =>
@@ -53,7 +55,7 @@ public static class ISymbolExtensionMethods
 
     public static bool IsGenericIEnumerableDefinition(this ISymbol symbol) => 
         symbol is INamedTypeSymbol namedSymbol && 
-        namedSymbol.ContainingNamespace.ToCodeString() == "System.Collections.Generic" && 
+        namedSymbol.GetNamespace() == "System.Collections.Generic" && 
         namedSymbol.Name == "IEnumerable" &&
         namedSymbol.TypeArguments.Length == 1;
 }
