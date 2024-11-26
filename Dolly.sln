@@ -15,6 +15,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dolly.Tests", "Dolly.Tests\Dolly.Tests.csproj", "{26CB6926-674A-4991-97F8-A8A157D0A7A9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -29,6 +31,10 @@ Global
 		{989876B1-7FB4-45F7-8018-D82439AFC138}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{989876B1-7FB4-45F7-8018-D82439AFC138}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{989876B1-7FB4-45F7-8018-D82439AFC138}.Release|Any CPU.Build.0 = Release|Any CPU
+		{26CB6926-674A-4991-97F8-A8A157D0A7A9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{26CB6926-674A-4991-97F8-A8A157D0A7A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{26CB6926-674A-4991-97F8-A8A157D0A7A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{26CB6926-674A-4991-97F8-A8A157D0A7A9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
