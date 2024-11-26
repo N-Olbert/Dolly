@@ -13,7 +13,7 @@ namespace Dolly;
  * Dictionary
  * X Record
  * X Private setters
- * X Ctor
+ * Ctor
  * X Inheritance
  * X IgnoreAttribute
  * Property without set
