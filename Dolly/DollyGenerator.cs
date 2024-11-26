@@ -81,10 +81,10 @@ public partial class DollyGenerator : IIncrementalGenerator
                 if (context.TargetNode is ClassDeclarationSyntax classDeclaration)
                 {
                     var symbol = context.SemanticModel.GetDeclaredSymbol(context.TargetNode);
-
                     if (symbol is INamedTypeSymbol namedTypeSymbol)
                     {
-                        if (Model.TryCreate(namedTypeSymbol, out var model, out var error))
+                        var nullabilityEnabled = context.SemanticModel.GetNullableContext(context.TargetNode.SpanStart).HasFlag(NullableContext.Enabled);
+                        if (Model.TryCreate(namedTypeSymbol, nullabilityEnabled, out var model, out var error))
                         {
                             return model;
                         }

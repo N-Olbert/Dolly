@@ -1,4 +1,4 @@
-﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis;
 
 namespace Dolly;
 
@@ -58,4 +58,17 @@ public static class ISymbolExtensionMethods
         namedSymbol.GetNamespace() == "System.Collections.Generic" && 
         namedSymbol.Name == "IEnumerable" &&
         namedSymbol.TypeArguments.Length == 1;
+
+    public static bool IsNullable(this ITypeSymbol symbol, bool nullabilityEnabled) =>
+        (!nullabilityEnabled && symbol.IsReferenceType) ||
+        (nullabilityEnabled && symbol.IsNullableValueType()) ||
+        (nullabilityEnabled && symbol.IsReferenceType && symbol.NullableAnnotation == NullableAnnotation.NotAnnotated);
+
+    public static bool IsNullableValueType(this ISymbol symbol) => 
+        symbol is INamedTypeSymbol namedSymbol && 
+        namedSymbol.IsValueType && 
+        namedSymbol.GetNamespace() == "System" && 
+        namedSymbol.Name == "Nullable" &&
+        namedSymbol.TypeArguments.Length == 1;
 }
+

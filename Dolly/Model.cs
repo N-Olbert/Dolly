@@ -63,7 +63,7 @@ record Model(string Namespace, string Name, ModelFlags Flags, EquatableArray<Mem
         return builder.ToString().TrimEnd();
     }
 
-    public static bool TryCreate(INamedTypeSymbol symbol, [NotNullWhen(true)] out Model? model, [NotNullWhen(false)] out DiagnosticInfo? error)
+    public static bool TryCreate(INamedTypeSymbol symbol, bool nullabilityEnabled, [NotNullWhen(true)] out Model? model, [NotNullWhen(false)] out DiagnosticInfo? error)
     {
         model = null;
         error = null;
@@ -77,13 +77,13 @@ record Model(string Namespace, string Name, ModelFlags Flags, EquatableArray<Mem
             .RecursiveFlatten(t => t.BaseType).SelectMany(t => t.GetMembers())
             .OfType<IPropertySymbol>()
             .Where(p => !p.HasAttribute("CloneIgnoreAttribute") && !p.IsStatic)
-            .Select(p => Member.Create(p.Name, p.SetMethod == null, p.Type))
+            .Select(p => Member.Create(p.Name, p.SetMethod == null, nullabilityEnabled, p.Type))
             .ToArray();
         var fields = symbol
             .RecursiveFlatten(t => t.BaseType).SelectMany(t => t.GetMembers())
             .OfType<IFieldSymbol>()
             .Where(f => !f.IsImplicitlyDeclared && !f.HasAttribute("CloneIgnoreAttribute") && !f.IsStatic && !f.IsConst)
-            .Select(m => Member.Create(m.Name, m.IsReadOnly, m.Type))
+            .Select(m => Member.Create(m.Name, m.IsReadOnly, nullabilityEnabled, m.Type))
             .ToArray();
 
         var members = properties.Concat(fields).ToArray();
