@@ -8,7 +8,7 @@ namespace Dolly;
 
 /*
  * Todo:
- * Embed Microsoft.Bcl.HashCode correctly
+ * X Embed Microsoft.Bcl.HashCode correctly
  * X List, Array, IEnumrable
  * Dictionary
  * X Record

@@ -2,37 +2,42 @@
 
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
-        <ImplicitUsings>enable</ImplicitUsings>
+        <LangVersion>latest</LangVersion>
         <Nullable>enable</Nullable>
-        <LangVersion>preview</LangVersion>
+        <ImplicitUsings>enable</ImplicitUsings>
+        
         <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
         <IsRoslynComponent>true</IsRoslynComponent>
         <CompilerGeneratedFilesOutputPath>Generated</CompilerGeneratedFilesOutputPath>
         <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
-        <IncludeSymbols>true</IncludeSymbols>
-        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+        <DevelopmentDependency>true</DevelopmentDependency>
+        <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
 
-        <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <!-- Generates a package at build -->
+        <IncludeBuildOutput>false</IncludeBuildOutput>
+        <!-- Do not include the generator as a lib dependency -->
+        
         <Description>Clone .net objects using source generation</Description>
         <PackageTags>Clone SourceGenerator</PackageTags>
-        <PackageIcon>icon.png</PackageIcon>	  
         <Version>0.1.0</Version>
         <PackageProjectUrl>https://github.com/AnderssonPeter/Dolly</PackageProjectUrl>
         <RepositoryUrl>https://github.com/AnderssonPeter/Dolly</RepositoryUrl>
         <RepositoryType>github</RepositoryType>
         <PackageReleaseNotes>0.1.0
-        * Initial version
+* Initial version
         </PackageReleaseNotes>
+        <PackageLicenseFile>LICENSE</PackageLicenseFile>
         <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageIcon>icon.png</PackageIcon>
     </PropertyGroup>
-
+    
     <ItemGroup>
         <AdditionalFiles Include="AnalyzerReleases.Shipped.md" />
         <AdditionalFiles Include="AnalyzerReleases.Unshipped.md" />
     </ItemGroup>
     
     <ItemGroup>
-        <PackageReference Include="Microsoft.Bcl.HashCode" Version="6.0.0" />
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.8.0" PrivateAssets="all" />
         <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.11.0" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers" />
         <PackageReference Include="PolySharp" Version="1.15.0">
@@ -42,14 +47,26 @@
     </ItemGroup>
 
     <ItemGroup>
+        <!-- Take a private dependency on Newtonsoft.Json (PrivateAssets=all) Consumers of this generator will not reference it.
+         Set GeneratePathProperty=true so we can reference the binaries via the Pkgicrosoft_Bcl_HashCode property -->
+        <PackageReference Include="Microsoft.Bcl.HashCode" Version="6.0.0" PrivateAssets="all" GeneratePathProperty="true" />
+
+        <!-- Package the generator in the analyzer directory of the nuget package -->
         <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+
+
+        <!-- Package the Newtonsoft.Json dependency alongside the generator assembly -->
+        <None Include="$(PkgMicrosoft_Bcl_HashCode)\lib\netstandard2.0\*.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
     </ItemGroup>
 
-
     <ItemGroup>
-        <None Include="..\LICENSE.md">
+        <None Include="..\LICENSE">
             <Pack>True</Pack>
-            <PackagePath></PackagePath>
+            <PackagePath>\</PackagePath>
+        </None>
+        <None Update="icon.png">
+            <Pack>True</Pack>
+            <PackagePath>\</PackagePath>
         </None>
         <None Include="..\README.md">
             <Pack>True</Pack>

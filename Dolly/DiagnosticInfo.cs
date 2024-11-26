@@ -14,6 +14,6 @@ internal sealed record DiagnosticInfo(DiagnosticDescriptor Descriptor, SyntaxTre
 
     public Diagnostic ToDiagnostic() => 
         SyntaxTree == null ?
-            Diagnostic.Create(Descriptor, Location.Create(SyntaxTree, TextSpan), Arguments.ToArray()) :
+            Diagnostic.Create(Descriptor, null, Arguments.ToArray()) :
             Diagnostic.Create(Descriptor, Location.Create(SyntaxTree, TextSpan), Arguments.ToArray());
 }
