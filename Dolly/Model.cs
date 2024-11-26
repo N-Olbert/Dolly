@@ -17,13 +17,12 @@ public enum ModelFlags
 }
 
 [DebuggerDisplay("{Namespace}.{Name}")]
-record Model(string Namespace, string Name, ModelFlags ModelFlags, EquatableArray<Member> Members, EquatableArray<Member> Constructor)
+record Model(string Namespace, string Name, ModelFlags Flags, EquatableArray<Member> Members, EquatableArray<Member> Constructor)
 {
-    public bool IsSealed => (ModelFlags & ModelFlags.Sealed) == ModelFlags.Sealed;
-    public bool HasClonableBaseClass => (ModelFlags & ModelFlags.ClonableBase) == ModelFlags.ClonableBase;
-    public bool IsRecord => (ModelFlags & ModelFlags.Record) == ModelFlags.Record;
-    public bool IsStruct => (ModelFlags & ModelFlags.Struct) == ModelFlags.Struct;
-
+    public bool IsSealed => Flags.HasFlag(ModelFlags.Sealed);
+    public bool HasClonableBaseClass => Flags.HasFlag(ModelFlags.ClonableBase);
+    public bool IsRecord => Flags.HasFlag(ModelFlags.Record);
+    public bool IsStruct => Flags.HasFlag(ModelFlags.Struct);
     public bool IsStructRecord => IsRecord && IsStruct;
 
     public string GetMethodModifiers()

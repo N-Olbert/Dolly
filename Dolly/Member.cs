@@ -1,4 +1,4 @@
-﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis;
 using System.Diagnostics;
 using System.Text;
 
@@ -17,10 +17,10 @@ public enum MemberFlags
 [DebuggerDisplay("{Name}")]
 sealed record Member(string Name, bool IsReadonly, MemberFlags Flags)
 {
-    public bool IsEnumerable => (Flags & MemberFlags.Enumerable) == MemberFlags.Enumerable;
-    public bool IsClonable => (Flags & MemberFlags.Clonable) == MemberFlags.Clonable;
-    public bool IsArrayCompatible => (Flags & MemberFlags.ArrayCompatible) == MemberFlags.ArrayCompatible;
-    public bool IsNewCompatible => (Flags & MemberFlags.NewCompatible) == MemberFlags.NewCompatible;
+    public bool IsEnumerable => Flags.HasFlag(MemberFlags.Enumerable);
+    public bool IsClonable => Flags.HasFlag(MemberFlags.Clonable);
+    public bool IsArrayCompatible => Flags.HasFlag(MemberFlags.ArrayCompatible);
+    public bool IsNewCompatible => Flags.HasFlag(MemberFlags.NewCompatible);
 
     public static Member Create(string name, bool isReadonly, ITypeSymbol symbol)
     {
