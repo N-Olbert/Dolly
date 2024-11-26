@@ -1,4 +1,4 @@
-﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -103,9 +103,9 @@ record Model(string Namespace, string Name, ModelFlags ModelFlags, EquatableArra
         }
 
         var constructorMembers = constructor.Parameters.Select(p => members.Single(m => m.Name.Equals(p.Name, StringComparison.OrdinalIgnoreCase))).ToArray();
-
+        var membersExcludingConstructor = members.Except(constructorMembers).ToArray();
         var flags = Model.GetFlags(symbol);
-        model = new Model(symbol.GetNamespace(), symbol.Name, flags, members, constructorMembers);
+        model = new Model(symbol.GetNamespace(), symbol.Name, flags, membersExcludingConstructor, constructorMembers);
         return true;
     }
 

@@ -13,7 +13,7 @@ namespace Dolly;
  * Dictionary
  * X Record
  * X Private setters
- * Ctor
+ * X Ctor
  * X Inheritance
  * X IgnoreAttribute
  * Property without set
@@ -108,13 +108,13 @@ public partial class DollyGenerator : IIncrementalGenerator
                 {
                     {{(!model.HasClonableBaseClass ? "object ICloneable.Clone() => this.Clone();" : "")}}
                     public {{model.GetMethodModifiers()}}{{model.Name}} Clone() =>
-                        new ()
+                        new ({{string.Join(", ", model.Constructor.Select(m => m.ToString(true)))}})
                         {
                 {{GenerateCloneMembers(model, true)}}
                         };
 
                     public {{model.GetMethodModifiers()}}{{model.Name}} ShallowClone() =>
-                        new ()
+                        new ({{string.Join(", ", model.Constructor.Select(m => m.ToString(false)))}})
                         {
                 {{GenerateCloneMembers(model, false)}}
                         };

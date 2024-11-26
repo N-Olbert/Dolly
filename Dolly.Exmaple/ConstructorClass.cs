@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,4 +11,5 @@ public partial class ConstructorClass(string onlyCtorCanSet)
 {
 
     public string OnlyCtorCanSet { get; } = onlyCtorCanSet;
+    public string AnyOneCanSet { get; set; }
 }

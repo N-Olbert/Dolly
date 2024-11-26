@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace Dolly;
 
@@ -24,7 +24,9 @@ internal sealed record Result<TValue>(TValue? Value, DiagnosticInfo? Error)
         {
             handleFailure(Error);
         }
-        throw new ArgumentOutOfRangeException("Both 'Value' and 'Error' are null!!!!!");
-
+        else
+        {
+            throw new ArgumentOutOfRangeException("Both 'Value' and 'Error' are null!!!!!");
+        }
     }
 }
