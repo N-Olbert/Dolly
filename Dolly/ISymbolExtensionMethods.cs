@@ -62,7 +62,7 @@ public static class ISymbolExtensionMethods
     public static bool IsNullable(this ITypeSymbol symbol, bool nullabilityEnabled) =>
         (!nullabilityEnabled && symbol.IsReferenceType) ||
         (nullabilityEnabled && symbol.IsNullableValueType()) ||
-        (nullabilityEnabled && symbol.IsReferenceType && symbol.NullableAnnotation == NullableAnnotation.NotAnnotated);
+        (nullabilityEnabled && symbol.IsReferenceType && symbol.NullableAnnotation == NullableAnnotation.Annotated);
 
     public static bool IsNullableValueType(this ISymbol symbol) => 
         symbol is INamedTypeSymbol namedSymbol && 
