@@ -10,7 +10,15 @@ public enum MemberFlags
     None = 0,
     Clonable = 1,
     Enumerable = 2,
+    /// <summary>
+    /// Can only occur when <see cref="MemberFlags.Enumerable"/> is present
+    /// Can never occur at the same time as <see cref="MemberFlags.NewCompatible"/>
+    /// </summary>
     ArrayCompatible = 4,
+    /// <summary>
+    /// Can only occur when <see cref="MemberFlags.Enumerable"/> is present
+    /// Can never occur at the same time as <see cref="MemberFlags.ArrayCompatible"/>
+    /// </summary>
     NewCompatible = 8,
     MemberValueType = 16,
     MemberNullable = 32,

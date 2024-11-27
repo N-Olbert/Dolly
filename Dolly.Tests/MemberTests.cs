@@ -14,6 +14,8 @@ public class MemberTests
     [Arguments("Value", MemberFlags.Clonable, true, "Value.Clone()")]
     [Arguments("Value", MemberFlags.Enumerable, false, "Value")]
     [Arguments("Value", MemberFlags.Enumerable, true, "Value")]
+    [Arguments("Value", MemberFlags.Enumerable | MemberFlags.Clonable, false, "Value")]
+    [Arguments("Value", MemberFlags.Enumerable | MemberFlags.Clonable, true, "Value.Select(item => item.Clone())")]
     [Arguments("Value", MemberFlags.Enumerable | MemberFlags.ArrayCompatible, false, "Value.ToArray()")]
     [Arguments("Value", MemberFlags.Enumerable | MemberFlags.ArrayCompatible, true, "Value.ToArray()")]
     [Arguments("Value", MemberFlags.Enumerable | MemberFlags.ArrayCompatible | MemberFlags.Clonable, false, "Value.ToArray()")]
@@ -24,8 +26,7 @@ public class MemberTests
     [Arguments("Value", MemberFlags.Enumerable | MemberFlags.NewCompatible, true, "new (Value)")]
     [Arguments("Value", MemberFlags.Enumerable | MemberFlags.NewCompatible | MemberFlags.Clonable, false, "new (Value)")]
     [Arguments("Value", MemberFlags.Enumerable | MemberFlags.NewCompatible | MemberFlags.Clonable, true, "new (Value.Select(item => item.Clone()))")]
-    [Arguments("Value", MemberFlags.NewCompatible, false, "new (Value)")]
-    [Arguments("Value", MemberFlags.NewCompatible, true, "new (Value)")]
+    //todo: add tests for MemberValueType, MemberNullable, ElementValueType, ElementNullable
     public async Task ToString(string name, MemberFlags flags, bool deepClone, string expected)
     {
         var member = new Member(name, false, flags);

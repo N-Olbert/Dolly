@@ -1,4 +1,4 @@
-﻿using Dolly;
+using Dolly;
 
 namespace Dolly.Exmaple;
 
