@@ -30,7 +30,7 @@ public partial class DollyGenerator : IIncrementalGenerator
 
         namespace Dolly
         {
-            [AttributeUsage(AttributeTargets.Class)]
+            [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
             public class ClonableAttribute : Attribute
             {
             }
@@ -75,25 +75,22 @@ public partial class DollyGenerator : IIncrementalGenerator
 
         var pipeline = context.SyntaxProvider.ForAttributeWithMetadataName<Result<Model>>(
             fullyQualifiedMetadataName: "Dolly.ClonableAttribute",
-            predicate: static (node, cancellationToken) => node is ClassDeclarationSyntax,
+            predicate: static (node, cancellationToken) => node is ClassDeclarationSyntax || node is StructDeclarationSyntax,
             transform: static (context, cancellationToken) =>
             {
-                if (context.TargetNode is ClassDeclarationSyntax classDeclaration)
+                var symbol = context.SemanticModel.GetDeclaredSymbol(context.TargetNode);
+                if (symbol is INamedTypeSymbol namedTypeSymbol)
                 {
-                    var symbol = context.SemanticModel.GetDeclaredSymbol(context.TargetNode);
-                    if (symbol is INamedTypeSymbol namedTypeSymbol)
+                    var nullabilityEnabled = context.SemanticModel.GetNullableContext(context.TargetNode.SpanStart).HasFlag(NullableContext.Enabled);
+                    if (Model.TryCreate(namedTypeSymbol, nullabilityEnabled, out var model, out var error))
                     {
-                        var nullabilityEnabled = context.SemanticModel.GetNullableContext(context.TargetNode.SpanStart).HasFlag(NullableContext.Enabled);
-                        if (Model.TryCreate(namedTypeSymbol, nullabilityEnabled, out var model, out var error))
-                        {
-                            return model;
-                        }
-                        else
-                        {
-                            return error;
-                        }
+                        return model;
                     }
-                }                
+                    else
+                    {
+                        return error;
+                    }
+                }
                 return DiagnosticInfo.Create(Diagnostics.FailedToGetModelError, context.TargetNode);
             });
 

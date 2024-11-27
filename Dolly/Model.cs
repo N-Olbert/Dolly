@@ -111,7 +111,7 @@ record Model(string Namespace, string Name, ModelFlags Flags, EquatableArray<Mem
     private static ModelFlags GetFlags(INamedTypeSymbol namedTypeSymbol)
     {
         var flags = ModelFlags.None;
-        if (namedTypeSymbol.IsSealed)
+        if (namedTypeSymbol.IsSealed && !namedTypeSymbol.IsValueType)
         {
             flags |= ModelFlags.Sealed;
         }
