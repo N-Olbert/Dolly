@@ -48,7 +48,7 @@ public sealed record Member(string Name, bool IsReadonly, MemberFlags Flags)
     private static MemberFlags GetFlags(ITypeSymbol symbol, bool nullabilityEnabled)
     {
         MemberFlags flags = MemberFlags.None;
-
+        get base type from nullable struct type
         if (symbol.IsNullable(nullabilityEnabled))
         {
             flags |= MemberFlags.MemberNullable;
