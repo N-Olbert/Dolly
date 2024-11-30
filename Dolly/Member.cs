@@ -1,6 +1,6 @@
-using Microsoft.CodeAnalysis;
 using System.Diagnostics;
 using System.Text;
+using Microsoft.CodeAnalysis;
 
 namespace Dolly;
 
@@ -12,18 +12,15 @@ public enum MemberFlags
     Enumerable = 2,
     /// <summary>
     /// Can only occur when <see cref="MemberFlags.Enumerable"/> is present
-    /// Can never occur at the same time as <see cref="MemberFlags.NewCompatible"/>
     /// </summary>
-    ArrayCompatible = 4,
+    NewCollection = 4,
+    MemberValueType = 8,
+    MemberNullable = 16,
+    ElementValueType = 32,
     /// <summary>
     /// Can only occur when <see cref="MemberFlags.Enumerable"/> is present
-    /// Can never occur at the same time as <see cref="MemberFlags.ArrayCompatible"/>
     /// </summary>
-    NewCompatible = 8,
-    MemberValueType = 16,
-    MemberNullable = 32,
-    ElementValueType = 64,
-    ElementNullable = 128,
+    ElementNullable = 64,
 }
 
 [DebuggerDisplay("{Name}")]
@@ -31,8 +28,7 @@ public sealed record Member(string Name, bool IsReadonly, MemberFlags Flags)
 {
     public bool IsEnumerable => Flags.HasFlag(MemberFlags.Enumerable);
     public bool IsClonable => Flags.HasFlag(MemberFlags.Clonable);
-    public bool IsArrayCompatible => Flags.HasFlag(MemberFlags.ArrayCompatible);
-    public bool IsNewCompatible => Flags.HasFlag(MemberFlags.NewCompatible);
+    public bool IsNewCompatible => Flags.HasFlag(MemberFlags.NewCollection);
     public bool IsMemberValueType => Flags.HasFlag(MemberFlags.MemberValueType);
     public bool IsMemberNullable => Flags.HasFlag(MemberFlags.MemberNullable);
     public bool IsElementValueType => Flags.HasFlag(MemberFlags.ElementValueType);
@@ -40,7 +36,7 @@ public sealed record Member(string Name, bool IsReadonly, MemberFlags Flags)
 
     public static Member Create(string name, bool isReadonly, bool nullabilityEnabled, ITypeSymbol symbol)
     {
-        var flags = GetFlags(symbol, nullabilityEnabled);            
+        var flags = GetFlags(symbol, nullabilityEnabled);
         return new Member(name, isReadonly, flags);
 
     }
@@ -61,7 +57,6 @@ public sealed record Member(string Name, bool IsReadonly, MemberFlags Flags)
         if (symbol is IArrayTypeSymbol arrayTypeSymbol)
         {
             flags |= MemberFlags.Enumerable;
-            flags |= MemberFlags.ArrayCompatible;
             if (arrayTypeSymbol.IsClonable())
             {
                 flags |= MemberFlags.Clonable;
@@ -79,7 +74,6 @@ public sealed record Member(string Name, bool IsReadonly, MemberFlags Flags)
         else if (symbol is INamedTypeSymbol namedSymbol && namedSymbol.IsGenericIEnumerable())
         {
             flags |= MemberFlags.Enumerable;
-            flags |= MemberFlags.ArrayCompatible;
             if (namedSymbol.TypeArguments[0].IsClonable())
             {
                 flags |= MemberFlags.Clonable;
@@ -102,7 +96,7 @@ public sealed record Member(string Name, bool IsReadonly, MemberFlags Flags)
             SymbolEqualityComparer.Default.Equals(enumerableType, constructorEnumerableType)))
         {
             flags |= MemberFlags.Enumerable;
-            flags |= MemberFlags.NewCompatible;
+            flags |= MemberFlags.NewCollection;
             if (enumerableType.IsClonable())
             {
                 flags |= MemberFlags.Clonable;
@@ -126,44 +120,71 @@ public sealed record Member(string Name, bool IsReadonly, MemberFlags Flags)
     public string ToString(bool deepClone)
     {
         var builder = new StringBuilder();
+        // Start building the output
         if (IsNewCompatible)
         {
+            // NewCollection logic
             if (IsMemberNullable)
             {
-                builder.Append(Name);
-                builder.Append(" == null ? null : new (");
+                builder.Append($"{Name} == null ? null : ");
+            }
+            builder.Append("new (");
+
+            // Add the inner value
+            if (!IsEnumerable)
+            {
+                throw new InvalidOperationException("This case should never happen");
+            }
+
+            if (deepClone && IsClonable)
+            {
+                if (IsElementNullable)
+                {
+                    builder.Append($"{Name}.Select(item => item?.DeepClone())");
+                }
+                else
+                {
+                    builder.Append($"{Name}.Select(item => item.DeepClone())");
+                }
             }
             else
             {
-                builder.Append("new (");
+                builder.Append(Name);
             }
-        }
-        builder.Append(Name);
-        if (IsMemberNullable && !IsNewCompatible)
-        {
-            builder.Append("?");
-        }
-        if (IsEnumerable)
-        {
-            if (IsClonable && deepClone)
-            {
-                builder.Append(".Select(item => item.Clone())");
-            }
-            if (IsArrayCompatible)
-            {
-                builder.Append(".ToArray()");
-            }
+
+            builder.Append(')');
         }
         else
         {
-            if (IsClonable && deepClone)
+            // Regular logic without NewCollection
+            if (IsMemberNullable && (IsEnumerable || (IsClonable && deepClone)))
             {
-                builder.Append(".Clone()");
+                builder.Append(Name).Append('?');
             }
-        }
-        if (IsNewCompatible)
-        {
-            builder.Append(")");
+            else
+            {
+                builder.Append(Name);
+            }
+
+            if (IsEnumerable)
+            {
+                if (deepClone && IsClonable)
+                {
+                    if (IsElementNullable)
+                    {
+                        builder.Append(".Select(item => item?.DeepClone())");
+                    }
+                    else
+                    {
+                        builder.Append(".Select(item => item.DeepClone())");
+                    }
+                }
+                builder.Append(".ToArray()");
+            }
+            else if (IsClonable && deepClone)
+            {
+                builder.Append(".DeepClone()");
+            }
         }
         return builder.ToString();
     }

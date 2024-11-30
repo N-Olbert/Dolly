@@ -1,7 +1,7 @@
+using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
-using System.Text;
 
 namespace Dolly;
 
@@ -55,10 +55,7 @@ public partial class DollyGenerator : IIncrementalGenerator
         {
             public interface IClonable<T> : ICloneable
             {
-                /// <summary>
-                /// Deep clone
-                /// </summary>
-                new T Clone();
+                T DeepClone();
                 T ShallowClone();
             }
         }
@@ -103,8 +100,8 @@ public partial class DollyGenerator : IIncrementalGenerator
                 namespace {{model.Namespace}};
                 partial {{model.GetModifiers()}} {{model.Name}} : IClonable<{{model.Name}}>
                 {
-                    {{(!model.HasClonableBaseClass ? "object ICloneable.Clone() => this.Clone();" : "")}}
-                    public {{model.GetMethodModifiers()}}{{model.Name}} Clone() =>
+                    {{(!model.HasClonableBaseClass ? "object ICloneable.Clone() => this.DeepClone();" : "")}}
+                    public {{model.GetMethodModifiers()}}{{model.Name}} DeepClone() =>
                         new ({{string.Join(", ", model.Constructor.Select(m => m.ToString(true)))}})
                         {
                 {{GenerateCloneMembers(model, true)}}
@@ -128,7 +125,7 @@ public partial class DollyGenerator : IIncrementalGenerator
     }
 
     private static string GenerateCloneMembers(Model model, bool deepClone) =>
-        string.Join(",\n", 
+        string.Join(",\n",
             model.Members
             .Select(m => $"{new string(' ', 12)}{m.Name} = {m.ToString(deepClone)}")
         );
