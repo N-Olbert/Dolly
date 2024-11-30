@@ -49,11 +49,11 @@ public sealed record Member(string Name, bool IsReadonly, MemberFlags Flags)
         if (symbol is IArrayTypeSymbol arrayTypeSymbol)
         {
             flags |= MemberFlags.Enumerable;
-            if (arrayTypeSymbol.IsClonable())
+            if (arrayTypeSymbol.ElementType.IsClonable())
             {
                 flags |= MemberFlags.Clonable;
             }
-            if (arrayTypeSymbol.IsNullable(nullabilityEnabled))
+            if (arrayTypeSymbol.ElementType.IsNullable(nullabilityEnabled))
             {
                 flags |= MemberFlags.ElementNullable;
             }

@@ -6,18 +6,30 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 namespace Dolly.Tests;
 public class GeneratorTests
 {
-
-    private Model GetModel(string code)
+    private Model GetModel(string code, Func<string, bool>? filter = null)
     {
         var compilation = CreateCompilation(code, true);
+        var diagnostics = compilation.GetDiagnostics().Where(d => d.Severity == DiagnosticSeverity.Error);
+        if (diagnostics.Any())
+        {
+            throw new Exception("Failed to compile code, errors:" + string.Join(", ", diagnostics));
+        }
+
         var syntaxTree = compilation.SyntaxTrees.Single(syntaxTree => syntaxTree.FilePath == "");
 
         var semanticModel = compilation.GetSemanticModel(syntaxTree);
 
+        var allNodes = syntaxTree
+            .GetRoot()
+            .RecursiveFlatten(n => n.ChildNodes())
+            .ToArray();
+
         var node = syntaxTree
             .GetRoot()
             .RecursiveFlatten(n => n.ChildNodes())
-            .Single(node => node is ClassDeclarationSyntax || node is StructDeclarationSyntax);
+            .Single(node =>
+            (node is ClassDeclarationSyntax classNode && (filter == null || filter(classNode.Identifier.Text))) ||
+            (node is StructDeclarationSyntax structNode && (filter == null || filter(structNode.Identifier.Text))));
         var symbol = semanticModel.GetDeclaredSymbol(node);
         if (symbol is INamedTypeSymbol namedTypeSymbol)
         {
@@ -48,6 +60,94 @@ public partial class SimpleClass
         var expected = new Model("Dolly", "SimpleClass", ModelFlags.None, new Member[] {
             new Member("First", false, MemberFlags.None),
             new Member("Second", false, MemberFlags.None)
+        }, EquatableArray<Member>.Empty());
+
+        await Assert.That(model).IsEquivalentTo(expected);
+    }
+
+    [Test]
+    public async Task SimpleStruct()
+    {
+        var model = GetModel(@"
+namespace Dolly;
+[Clonable]
+public partial struct SimpleStruct
+{
+    public string First { get; set; }
+    public int Second { get; set; }
+    [CloneIgnore]
+    public float DontClone { get; set; }
+}
+");
+        var expected = new Model("Dolly", "SimpleStruct", ModelFlags.Struct, new Member[] {
+            new Member("First", false, MemberFlags.None),
+            new Member("Second", false, MemberFlags.None)
+        }, EquatableArray<Member>.Empty());
+
+        await Assert.That(model).IsEquivalentTo(expected);
+    }
+
+    [Test]
+    public async Task Collections()
+    {
+        var model = GetModel(@"
+using System.Collections.Generic;
+namespace Dolly;
+[Clonable]
+public partial class SimpleClass
+{
+    public string First { get; set; }
+    public int Second { get; set; }
+    [CloneIgnore]
+    public float DontClone { get; set; }
+}
+
+[Clonable]
+public partial struct SimpleStruct
+{
+    public string First { get; set; }
+    public int Second { get; set; }
+    [CloneIgnore]
+    public float DontClone { get; set; }
+}
+
+[Clonable]
+public partial class ComplexClass
+{
+    public int[] IntArray { get; set; }
+    public List<int> IntList { get; set; }
+    public IEnumerable<int> IntIEnumerable { get; set; }
+
+    public string[] StringArray { get; set; }
+    public List<string> StringList { get; set; }
+    public IEnumerable<string> StringIEnumerable { get; set; }
+
+    public SimpleClass[] ReferenceArray { get; set; }
+    public List<SimpleClass> ReferenceList { get; set; }
+    public IEnumerable<SimpleClass> ReferenceIEnumerable { get; set; }
+
+    public SimpleStruct[] ValueArray { get; set; }
+    public List<SimpleStruct> ValueList { get; set; }
+    public IEnumerable<SimpleStruct> ValueIEnumerable { get; set; }
+}
+", name => name == "ComplexClass");
+        var expected = new Model("Dolly", "ComplexClass", ModelFlags.None, new Member[] {
+
+            new Member("IntArray", false, MemberFlags.Enumerable),
+            new Member("IntList", false, MemberFlags.Enumerable | MemberFlags.NewCollection),
+            new Member("IntIEnumerable", false, MemberFlags.Enumerable),
+
+            new Member("StringArray", false, MemberFlags.Enumerable),
+            new Member("StringList", false, MemberFlags.Enumerable | MemberFlags.NewCollection),
+            new Member("StringIEnumerable", false, MemberFlags.Enumerable),
+
+            new Member("ReferenceArray", false, MemberFlags.Clonable | MemberFlags.Enumerable),
+            new Member("ReferenceList", false, MemberFlags.Clonable | MemberFlags.Enumerable | MemberFlags.NewCollection),
+            new Member("ReferenceIEnumerable", false, MemberFlags.Clonable | MemberFlags.Enumerable),
+
+            new Member("ValueArray", false, MemberFlags.Clonable | MemberFlags.Enumerable),
+            new Member("ValueList", false, MemberFlags.Clonable | MemberFlags.Enumerable | MemberFlags.NewCollection),
+            new Member("ValueIEnumerable", false, MemberFlags.Clonable | MemberFlags.Enumerable)
         }, EquatableArray<Member>.Empty());
 
         await Assert.That(model).IsEquivalentTo(expected);
@@ -107,5 +207,7 @@ public partial class SimpleClass
                    ] :
                [CSharpSyntaxTree.ParseText(source)],
                new[] { MetadataReference.CreateFromFile(typeof(Binder).GetTypeInfo().Assembly.Location) },
-               new CSharpCompilationOptions(OutputKind.ConsoleApplication));
+               new CSharpCompilationOptions(
+                   OutputKind.NetModule,
+                   nullableContextOptions: NullableContextOptions.Enable));
 }
