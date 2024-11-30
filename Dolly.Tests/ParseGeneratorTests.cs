@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Dolly.Tests;
-public class GeneratorTests
+public class ParseGeneratorTests
 {
     private Model GetModel(string code, Func<string, bool>? filter = null)
     {
