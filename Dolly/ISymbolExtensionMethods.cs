@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.CodeAnalysis;
 
 namespace Dolly;
@@ -53,22 +54,39 @@ public static class ISymbolExtensionMethods
     public static bool IsGenericIEnumerable(this ISymbol symbol) =>
         symbol is INamedTypeSymbol namedSymbol && namedSymbol.IsGenericType && namedSymbol.ConstructedFrom.IsGenericIEnumerableDefinition();
 
-    public static bool IsGenericIEnumerableDefinition(this ISymbol symbol) => 
-        symbol is INamedTypeSymbol namedSymbol && 
-        namedSymbol.GetNamespace() == "System.Collections.Generic" && 
+    public static bool IsGenericIEnumerableDefinition(this ISymbol symbol) =>
+        symbol is INamedTypeSymbol namedSymbol &&
+        namedSymbol.GetNamespace() == "System.Collections.Generic" &&
         namedSymbol.Name == "IEnumerable" &&
         namedSymbol.TypeArguments.Length == 1;
 
-    public static bool IsNullable(this ITypeSymbol symbol, bool nullabilityEnabled) =>
-        (!nullabilityEnabled && symbol.IsReferenceType) ||
-        (nullabilityEnabled && symbol.IsNullableValueType()) ||
-        (nullabilityEnabled && symbol.IsReferenceType && symbol.NullableAnnotation == NullableAnnotation.Annotated);
+    public static bool IsNullable(this ITypeSymbol symbol, bool nullabilityEnabled, [NotNullWhen(true)] out ITypeSymbol innerType)
+    {
+        innerType = symbol;
+        if (nullabilityEnabled && symbol.IsNullableValueType(out var valueInnerType))
+        {
+            innerType = valueInnerType;
+            return true;
+        }
 
-    public static bool IsNullableValueType(this ISymbol symbol) => 
-        symbol is INamedTypeSymbol namedSymbol && 
-        namedSymbol.IsValueType && 
-        namedSymbol.GetNamespace() == "System" && 
+        return (!nullabilityEnabled && symbol.IsReferenceType) ||
+            (nullabilityEnabled && symbol.IsReferenceType && symbol.NullableAnnotation == NullableAnnotation.Annotated);
+    }
+
+    public static bool IsNullableValueType(this ISymbol symbol, [NotNullWhen(true)] out ITypeSymbol? innerType)
+    {
+        if (symbol is INamedTypeSymbol namedSymbol &&
+        namedSymbol.IsValueType &&
+        namedSymbol.GetNamespace() == "System" &&
         namedSymbol.Name == "Nullable" &&
-        namedSymbol.TypeArguments.Length == 1;
+        namedSymbol.TypeArguments.Length == 1)
+        {
+            innerType = namedSymbol.TypeArguments[0];
+            return true;
+        }
+        innerType = null;
+        return false;
+    }
+
 }
 

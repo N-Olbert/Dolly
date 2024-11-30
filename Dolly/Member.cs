@@ -40,7 +40,7 @@ public sealed record Member(string Name, bool IsReadonly, MemberFlags Flags)
     private static MemberFlags GetFlags(ITypeSymbol symbol, bool nullabilityEnabled)
     {
         MemberFlags flags = MemberFlags.None;
-        if (symbol.IsNullable(nullabilityEnabled))
+        if (symbol.IsNullable(nullabilityEnabled, out symbol))
         {
             flags |= MemberFlags.MemberNullable;
         }
@@ -49,26 +49,28 @@ public sealed record Member(string Name, bool IsReadonly, MemberFlags Flags)
         if (symbol is IArrayTypeSymbol arrayTypeSymbol)
         {
             flags |= MemberFlags.Enumerable;
-            if (arrayTypeSymbol.ElementType.IsClonable())
-            {
-                flags |= MemberFlags.Clonable;
-            }
-            if (arrayTypeSymbol.ElementType.IsNullable(nullabilityEnabled))
+            var elementType = arrayTypeSymbol.ElementType;
+            if (elementType.IsNullable(nullabilityEnabled, out elementType))
             {
                 flags |= MemberFlags.ElementNullable;
+            }
+            if (elementType.IsClonable())
+            {
+                flags |= MemberFlags.Clonable;
             }
         }
         // Handle Enumerable
         else if (symbol is INamedTypeSymbol namedSymbol && namedSymbol.IsGenericIEnumerable())
         {
             flags |= MemberFlags.Enumerable;
-            if (namedSymbol.TypeArguments[0].IsClonable())
-            {
-                flags |= MemberFlags.Clonable;
-            }
-            if (namedSymbol.TypeArguments[0].IsNullable(nullabilityEnabled))
+            var elementType = namedSymbol.TypeArguments[0];
+            if (elementType.IsNullable(nullabilityEnabled, out elementType))
             {
                 flags |= MemberFlags.ElementNullable;
+            }
+            if (elementType.IsClonable())
+            {
+                flags |= MemberFlags.Clonable;
             }
         }
         // Handle types that implement IEnumerable<T> and take IEnumerable<T> as constructor parameter (ConcurrentQueue<T>, List<T>, ConcurrentStack<T> and LinkedList<T>)
@@ -81,13 +83,13 @@ public sealed record Member(string Name, bool IsReadonly, MemberFlags Flags)
         {
             flags |= MemberFlags.Enumerable;
             flags |= MemberFlags.NewCollection;
+            if (enumerableType.IsNullable(nullabilityEnabled, out enumerableType))
+            {
+                flags |= MemberFlags.ElementNullable;
+            }
             if (enumerableType.IsClonable())
             {
                 flags |= MemberFlags.Clonable;
-            }
-            if (enumerableType.IsNullable(nullabilityEnabled))
-            {
-                flags |= MemberFlags.ElementNullable;
             }
         }
         else if (symbol.IsClonable())
