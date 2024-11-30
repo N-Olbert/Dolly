@@ -22,7 +22,6 @@ public class MemberTests
     [Arguments("Value", MemberFlags.Clonable | MemberFlags.Enumerable | MemberFlags.ElementNullable, true, "Value.Select(item => item?.DeepClone()).ToArray()")]
     [Arguments("Value", MemberFlags.Clonable | MemberFlags.MemberNullable, false, "Value")]
     [Arguments("Value", MemberFlags.Clonable | MemberFlags.MemberNullable, true, "Value?.DeepClone()")]
-
     [Arguments("Value", MemberFlags.Enumerable, false, "Value.ToArray()")]
     [Arguments("Value", MemberFlags.Enumerable, true, "Value.ToArray()")]
     [Arguments("Value", MemberFlags.Enumerable | MemberFlags.NewCollection, false, "new (Value)")]

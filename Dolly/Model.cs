@@ -1,8 +1,8 @@
-using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
+using Microsoft.CodeAnalysis;
 
 namespace Dolly;
 
@@ -17,7 +17,7 @@ public enum ModelFlags
 }
 
 [DebuggerDisplay("{Namespace}.{Name}")]
-record Model(string Namespace, string Name, ModelFlags Flags, EquatableArray<Member> Members, EquatableArray<Member> Constructor)
+public record Model(string Namespace, string Name, ModelFlags Flags, EquatableArray<Member> Members, EquatableArray<Member> Constructor)
 {
     public bool IsSealed => Flags.HasFlag(ModelFlags.Sealed);
     public bool HasClonableBaseClass => Flags.HasFlag(ModelFlags.ClonableBase);

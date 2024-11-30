@@ -1,9 +1,9 @@
-﻿using Microsoft.CodeAnalysis.Text;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Text;
 
 namespace Dolly;
 
-internal sealed record DiagnosticInfo(DiagnosticDescriptor Descriptor, SyntaxTree? SyntaxTree, TextSpan TextSpan,
+public sealed record DiagnosticInfo(DiagnosticDescriptor Descriptor, SyntaxTree? SyntaxTree, TextSpan TextSpan,
     EquatableArray<string> Arguments)
 {
     public static DiagnosticInfo Create(DiagnosticDescriptor descriptor, ISymbol symbol, params string[] Arguments) =>
@@ -12,7 +12,7 @@ internal sealed record DiagnosticInfo(DiagnosticDescriptor Descriptor, SyntaxTre
     public static DiagnosticInfo Create(DiagnosticDescriptor descriptor, SyntaxNode node, params string[] Arguments) =>
         new(descriptor, node.GetLocation().SourceTree, node.GetLocation().SourceSpan, Arguments);
 
-    public Diagnostic ToDiagnostic() => 
+    public Diagnostic ToDiagnostic() =>
         SyntaxTree == null ?
             Diagnostic.Create(Descriptor, null, Arguments.ToArray()) :
             Diagnostic.Create(Descriptor, Location.Create(SyntaxTree, TextSpan), Arguments.ToArray());

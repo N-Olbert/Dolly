@@ -14,13 +14,11 @@ public enum MemberFlags
     /// Can only occur when <see cref="MemberFlags.Enumerable"/> is present
     /// </summary>
     NewCollection = 4,
-    MemberValueType = 8,
-    MemberNullable = 16,
-    ElementValueType = 32,
+    MemberNullable = 8,
     /// <summary>
     /// Can only occur when <see cref="MemberFlags.Enumerable"/> is present
     /// </summary>
-    ElementNullable = 64,
+    ElementNullable = 32,
 }
 
 [DebuggerDisplay("{Name}")]
@@ -29,9 +27,7 @@ public sealed record Member(string Name, bool IsReadonly, MemberFlags Flags)
     public bool IsEnumerable => Flags.HasFlag(MemberFlags.Enumerable);
     public bool IsClonable => Flags.HasFlag(MemberFlags.Clonable);
     public bool IsNewCompatible => Flags.HasFlag(MemberFlags.NewCollection);
-    public bool IsMemberValueType => Flags.HasFlag(MemberFlags.MemberValueType);
     public bool IsMemberNullable => Flags.HasFlag(MemberFlags.MemberNullable);
-    public bool IsElementValueType => Flags.HasFlag(MemberFlags.ElementValueType);
     public bool IsElementNullable => Flags.HasFlag(MemberFlags.ElementNullable);
 
     public static Member Create(string name, bool isReadonly, bool nullabilityEnabled, ITypeSymbol symbol)
@@ -48,10 +44,6 @@ public sealed record Member(string Name, bool IsReadonly, MemberFlags Flags)
         {
             flags |= MemberFlags.MemberNullable;
         }
-        if (symbol.IsValueType)
-        {
-            flags |= MemberFlags.MemberValueType;
-        }
 
         // Handle Array
         if (symbol is IArrayTypeSymbol arrayTypeSymbol)
@@ -65,10 +57,6 @@ public sealed record Member(string Name, bool IsReadonly, MemberFlags Flags)
             {
                 flags |= MemberFlags.ElementNullable;
             }
-            if (arrayTypeSymbol.IsValueType)
-            {
-                flags |= MemberFlags.ElementValueType;
-            }
         }
         // Handle Enumerable
         else if (symbol is INamedTypeSymbol namedSymbol && namedSymbol.IsGenericIEnumerable())
@@ -81,10 +69,6 @@ public sealed record Member(string Name, bool IsReadonly, MemberFlags Flags)
             if (namedSymbol.TypeArguments[0].IsNullable(nullabilityEnabled))
             {
                 flags |= MemberFlags.ElementNullable;
-            }
-            if (namedSymbol.TypeArguments[0].IsValueType)
-            {
-                flags |= MemberFlags.ElementValueType;
             }
         }
         // Handle types that implement IEnumerable<T> and take IEnumerable<T> as constructor parameter (ConcurrentQueue<T>, List<T>, ConcurrentStack<T> and LinkedList<T>)
@@ -104,10 +88,6 @@ public sealed record Member(string Name, bool IsReadonly, MemberFlags Flags)
             if (enumerableType.IsNullable(nullabilityEnabled))
             {
                 flags |= MemberFlags.ElementNullable;
-            }
-            if (enumerableType.IsValueType)
-            {
-                flags |= MemberFlags.ElementValueType;
             }
         }
         else if (symbol.IsClonable())

@@ -1,12 +1,11 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Immutable;
 
 namespace Dolly;
 
-internal readonly struct EquatableArray<T> : IEquatable<EquatableArray<T>>, IEnumerable<T>, IReadOnlyList<T>
+public readonly struct EquatableArray<T> : IEquatable<EquatableArray<T>>, IEnumerable<T>, IReadOnlyList<T>
 {
-    
-    private readonly ImmutableArray<T> array;
+    private readonly ImmutableArray<T> array = ImmutableArray<T>.Empty;
 
     public EquatableArray(T[] array)
     {
@@ -25,7 +24,7 @@ internal readonly struct EquatableArray<T> : IEquatable<EquatableArray<T>>, IEnu
 
     public override int GetHashCode()
     {
-        
+
         if (array.Length == 0)
         {
             return 0;
@@ -40,6 +39,8 @@ internal readonly struct EquatableArray<T> : IEquatable<EquatableArray<T>>, IEnu
         return hashCode.ToHashCode();
     }
 
-    public static implicit operator EquatableArray<T>(T[] source) => 
+    public static implicit operator EquatableArray<T>(T[] source) =>
         new EquatableArray<T>(source);
+
+    public static EquatableArray<T> Empty() => new EquatableArray<T>([]);
 }

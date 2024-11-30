@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
 namespace Dolly;
-internal static class ObjectExtensionMethods
+public static class ObjectExtensionMethods
 {
     public static IEnumerable<T> RecursiveFlatten<T>(this T value, Func<T, T?> getChild) where T : class
     {
@@ -15,6 +11,19 @@ internal static class ObjectExtensionMethods
             {
                 yield return tmp;
 
+            }
+        }
+    }
+
+    public static IEnumerable<T> RecursiveFlatten<T>(this T value, Func<T, IEnumerable<T>> getChildren) where T : class
+    {
+        yield return value;
+        var children = getChildren(value);
+        foreach (var child in children)
+        {
+            foreach (var tmp in child.RecursiveFlatten(getChildren))
+            {
+                yield return tmp;
             }
         }
     }
