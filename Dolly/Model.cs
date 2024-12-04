@@ -78,7 +78,7 @@ public record Model(string Namespace, string Name, ModelFlags Flags, EquatableAr
         var properties = symbol
             .RecursiveFlatten(t => t.BaseType).SelectMany(t => t.GetMembers())
             .OfType<IPropertySymbol>()
-            .Where(p => !p.HasAttribute("CloneIgnoreAttribute") && !p.IsStatic)
+            .Where(p => !p.IsImplicitlyDeclared && !p.HasAttribute("CloneIgnoreAttribute") && !p.IsStatic)
             .Select(p => Member.Create(p.Name, p.SetMethod == null, nullabilityEnabled, p.Type))
             .ToArray();
         var fields = symbol

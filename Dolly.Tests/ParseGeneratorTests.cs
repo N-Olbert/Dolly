@@ -6,45 +6,8 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 namespace Dolly.Tests;
 public class ParseGeneratorTests
 {
-    private Model GetModel(string code, Func<string, bool>? filter = null)
-    {
-        var compilation = CreateCompilation(code, true);
-        var diagnostics = compilation.GetDiagnostics().Where(d => d.Severity == DiagnosticSeverity.Error);
-        if (diagnostics.Any())
-        {
-            throw new Exception("Failed to compile code, errors:" + string.Join(", ", diagnostics));
-        }
-
-        var syntaxTree = compilation.SyntaxTrees.Single(syntaxTree => syntaxTree.FilePath == "");
-
-        var semanticModel = compilation.GetSemanticModel(syntaxTree);
-
-        var allNodes = syntaxTree
-            .GetRoot()
-            .RecursiveFlatten(n => n.ChildNodes())
-            .ToArray();
-
-        var node = syntaxTree
-            .GetRoot()
-            .RecursiveFlatten(n => n.ChildNodes())
-            .Single(node =>
-            (node is ClassDeclarationSyntax classNode && (filter == null || filter(classNode.Identifier.Text))) ||
-            (node is StructDeclarationSyntax structNode && (filter == null || filter(structNode.Identifier.Text))));
-        var symbol = semanticModel.GetDeclaredSymbol(node);
-        if (symbol is INamedTypeSymbol namedTypeSymbol)
-        {
-            if (Model.TryCreate(namedTypeSymbol, true, out var model, out var error))
-            {
-                return model;
-            }
-            throw new Exception("Failed to create model, error: " + error.Descriptor.Description);
-        }
-
-        throw new Exception("Symbol is not of type INamedTypeSymbol");
-    }
-
     [Test]
-    public async Task SimpleClass()
+    public async Task ParseSimpleClass()
     {
         var model = GetModel(@"
 namespace Dolly;
@@ -66,7 +29,7 @@ public partial class SimpleClass
     }
 
     [Test]
-    public async Task SimpleStruct()
+    public async Task ParseSimpleStruct()
     {
         var model = GetModel(@"
 namespace Dolly;
@@ -88,7 +51,7 @@ public partial struct SimpleStruct
     }
 
     [Test]
-    public async Task CollectionsNotNullable()
+    public async Task ParseCollectionsNotNullable()
     {
         var model = GetModel(@"
 using System.Collections.Generic;
@@ -154,7 +117,7 @@ public partial class ComplexClass
     }
 
     [Test]
-    public async Task CollectionMemberNullable()
+    public async Task ParseCollectionMemberNullable()
     {
         var model = GetModel(@"
 using System.Collections.Generic;
@@ -220,7 +183,7 @@ public partial class ComplexClass
     }
 
     [Test]
-    public async Task CollectionElementNullable()
+    public async Task ParseCollectionElementNullable()
     {
         var model = GetModel(@"
 using System.Collections.Generic;
@@ -286,7 +249,7 @@ public partial class ComplexClass
     }
 
     [Test]
-    public async Task CollectionMemberAndElementNullable()
+    public async Task ParseCollectionMemberAndElementNullable()
     {
         var model = GetModel(@"
 using System.Collections.Generic;
@@ -351,7 +314,7 @@ public partial class ComplexClass
     }
 
     [Test]
-    public async Task Nullable()
+    public async Task ParseNullable()
     {
         var model = GetModel(@"
 using System.Collections.Generic;
@@ -402,9 +365,32 @@ public partial class ComplexClass
         await Assert.That(model).IsEquivalentTo(expected);
     }
 
-    public async Task ClassFlags()
-    {
 
+    [Test]
+    [Arguments("class", false, ModelFlags.None)]
+    [Arguments("record", false, ModelFlags.Record)]
+    [Arguments("record struct", false, ModelFlags.Record | ModelFlags.Struct)]
+    [Arguments("record", true, ModelFlags.Record | ModelFlags.ClonableBase)]
+    [Arguments("struct", false, ModelFlags.Struct)]
+    // [Arguments("struct", true, ModelFlags.Struct | ModelFlags.ClonableBase)] // Cannot occur
+    [Arguments("class", true, ModelFlags.ClonableBase)]
+    public async Task ParseModelFlags(string modifiers, bool hasClonableBase, ModelFlags expected)
+    {
+        var model = GetModel($$"""
+using System.Collections.Generic;
+namespace Dolly;
+[Clonable]
+public partial {{modifiers}} SimpleClass
+{
+}
+
+[Clonable]
+public partial {{modifiers}} ComplexClass{{(hasClonableBase ? ": SimpleClass" : "")}}
+{
+}
+""", name => name == "ComplexClass");
+
+        await Assert.That(model.Flags).IsEquivalentTo(expected);
     }
 
     //Model modifiers
@@ -468,4 +454,43 @@ public partial class ComplexClass
                new CSharpCompilationOptions(
                    OutputKind.NetModule,
                    nullableContextOptions: NullableContextOptions.Enable));
+
+
+    private Model GetModel(string code, Func<string, bool>? filter = null)
+    {
+        var compilation = CreateCompilation(code, true);
+        var diagnostics = compilation.GetDiagnostics().Where(d => d.Severity == DiagnosticSeverity.Error);
+        if (diagnostics.Any())
+        {
+            throw new Exception("Failed to compile code, errors:" + string.Join(", ", diagnostics));
+        }
+
+        var syntaxTree = compilation.SyntaxTrees.Single(syntaxTree => syntaxTree.FilePath == "");
+
+        var semanticModel = compilation.GetSemanticModel(syntaxTree);
+
+        var allNodes = syntaxTree
+            .GetRoot()
+            .RecursiveFlatten(n => n.ChildNodes())
+            .ToArray();
+
+        var node = syntaxTree
+            .GetRoot()
+            .RecursiveFlatten(n => n.ChildNodes())
+            .Single(node =>
+            (node is ClassDeclarationSyntax classNode && (filter == null || filter(classNode.Identifier.Text))) ||
+            (node is RecordDeclarationSyntax recordNode && (filter == null || filter(recordNode.Identifier.Text))) ||
+            (node is StructDeclarationSyntax structNode && (filter == null || filter(structNode.Identifier.Text))));
+        var symbol = semanticModel.GetDeclaredSymbol(node);
+        if (symbol is INamedTypeSymbol namedTypeSymbol)
+        {
+            if (Model.TryCreate(namedTypeSymbol, true, out var model, out var error))
+            {
+                return model;
+            }
+            throw new Exception("Failed to create model, error: " + error.Descriptor.Description);
+        }
+
+        throw new Exception("Symbol is not of type INamedTypeSymbol");
+    }
 }

@@ -72,7 +72,7 @@ public partial class DollyGenerator : IIncrementalGenerator
 
         var pipeline = context.SyntaxProvider.ForAttributeWithMetadataName<Result<Model>>(
             fullyQualifiedMetadataName: "Dolly.ClonableAttribute",
-            predicate: static (node, cancellationToken) => node is ClassDeclarationSyntax || node is StructDeclarationSyntax,
+            predicate: static (node, cancellationToken) => node is ClassDeclarationSyntax || node is StructDeclarationSyntax || node is RecordDeclarationSyntax,
             transform: static (context, cancellationToken) =>
             {
                 var symbol = context.SemanticModel.GetDeclaredSymbol(context.TargetNode);
