@@ -10,8 +10,8 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis" Version="4.8.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.SourceGenerators.Testing" Version="1.1.2" />
-    <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" Version="17.12.6" />
-    <PackageReference Include="TUnit" Version="0.4.31" />
+    <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" Version="17.13.1" />
+    <PackageReference Include="TUnit" Version="0.4.74" />
   </ItemGroup>
 
   <ItemGroup>

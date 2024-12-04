@@ -94,7 +94,7 @@ public sealed record Member(string Name, bool IsReadonly, MemberFlags Flags)
         }
         else if (symbol.IsClonable())
         {
-            flags = MemberFlags.Clonable;
+            flags |= MemberFlags.Clonable;
         }
         return flags;
     }

@@ -16,10 +16,10 @@ namespace Dolly;
  * X Ctor
  * X Inheritance
  * X IgnoreAttribute
- * Property without set
- * Handle null values
+ * X Handle null values
  * X Structs
  * CloneConstructorAttribute
+ * IClone
  */
 
 [Generator]
@@ -98,7 +98,7 @@ public partial class DollyGenerator : IIncrementalGenerator
                 var sourceText = SourceText.From($$"""
                 using System.Linq;
                 namespace {{model.Namespace}};
-                partial {{model.GetModifiers()}} {{model.Name}} : IClonable<{{model.Name}}>
+                {{model.GetModifiers()}} {{model.Name}} : IClonable<{{model.Name}}>
                 {
                     {{(!model.HasClonableBaseClass ? "object ICloneable.Clone() => this.DeepClone();" : "")}}
                     public {{model.GetMethodModifiers()}}{{model.Name}} DeepClone() =>

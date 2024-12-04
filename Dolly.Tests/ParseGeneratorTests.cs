@@ -88,7 +88,7 @@ public partial struct SimpleStruct
     }
 
     [Test]
-    public async Task Collections()
+    public async Task CollectionsNotNullable()
     {
         var model = GetModel(@"
 using System.Collections.Generic;
@@ -284,6 +284,132 @@ public partial class ComplexClass
 
         await Assert.That(model).IsEquivalentTo(expected);
     }
+
+    [Test]
+    public async Task CollectionMemberAndElementNullable()
+    {
+        var model = GetModel(@"
+using System.Collections.Generic;
+namespace Dolly;
+[Clonable]
+public partial class SimpleClass
+{
+    public string First { get; set; }
+    public int Second { get; set; }
+    [CloneIgnore]
+    public float DontClone { get; set; }
+}
+
+[Clonable]
+public partial struct SimpleStruct
+{
+    public string First { get; set; }
+    public int Second { get; set; }
+    [CloneIgnore]
+    public float DontClone { get; set; }
+}
+
+[Clonable]
+public partial class ComplexClass
+{
+    public int?[]? IntArray { get; set; }
+    public List<int?>? IntList { get; set; }
+    public IEnumerable<int?>? IntIEnumerable { get; set; }
+
+    public string?[]? StringArray { get; set; }
+    public List<string?>? StringList { get; set; }
+    public IEnumerable<string?>? StringIEnumerable { get; set; }
+
+    public SimpleClass?[]? ReferenceArray { get; set; }
+    public List<SimpleClass?>? ReferenceList { get; set; }
+    public IEnumerable<SimpleClass?>? ReferenceIEnumerable { get; set; }
+
+    public SimpleStruct?[]? ValueArray { get; set; }
+    public List<SimpleStruct?>? ValueList { get; set; }
+    public IEnumerable<SimpleStruct?>? ValueIEnumerable { get; set; }
+}
+", name => name == "ComplexClass");
+        var expected = new Model("Dolly", "ComplexClass", ModelFlags.None, new Member[] {
+            new Member("IntArray", false, MemberFlags.Enumerable | MemberFlags.MemberNullable | MemberFlags.ElementNullable),
+            new Member("IntList", false, MemberFlags.Enumerable | MemberFlags.NewCollection | MemberFlags.MemberNullable | MemberFlags.ElementNullable),
+            new Member("IntIEnumerable", false, MemberFlags.Enumerable | MemberFlags.MemberNullable | MemberFlags.ElementNullable),
+
+            new Member("StringArray", false, MemberFlags.Enumerable | MemberFlags.MemberNullable | MemberFlags.ElementNullable),
+            new Member("StringList", false, MemberFlags.Enumerable | MemberFlags.NewCollection | MemberFlags.MemberNullable | MemberFlags.ElementNullable),
+            new Member("StringIEnumerable", false, MemberFlags.Enumerable | MemberFlags.MemberNullable | MemberFlags.ElementNullable),
+
+            new Member("ReferenceArray", false, MemberFlags.Clonable | MemberFlags.Enumerable | MemberFlags.MemberNullable | MemberFlags.ElementNullable),
+            new Member("ReferenceList", false, MemberFlags.Clonable | MemberFlags.Enumerable | MemberFlags.NewCollection | MemberFlags.MemberNullable | MemberFlags.ElementNullable),
+            new Member("ReferenceIEnumerable", false, MemberFlags.Clonable | MemberFlags.MemberNullable | MemberFlags.Enumerable | MemberFlags.ElementNullable),
+
+            new Member("ValueArray", false, MemberFlags.Clonable | MemberFlags.Enumerable | MemberFlags.MemberNullable | MemberFlags.ElementNullable),
+            new Member("ValueList", false, MemberFlags.Clonable | MemberFlags.Enumerable | MemberFlags.NewCollection | MemberFlags.MemberNullable | MemberFlags.ElementNullable),
+            new Member("ValueIEnumerable", false, MemberFlags.Clonable | MemberFlags.Enumerable | MemberFlags.MemberNullable | MemberFlags.ElementNullable)
+        }, EquatableArray<Member>.Empty());
+
+        await Assert.That(model).IsEquivalentTo(expected);
+    }
+
+    [Test]
+    public async Task Nullable()
+    {
+        var model = GetModel(@"
+using System.Collections.Generic;
+namespace Dolly;
+[Clonable]
+public partial class SimpleClass
+{
+    public string First { get; set; }
+    public int Second { get; set; }
+    [CloneIgnore]
+    public float DontClone { get; set; }
+}
+
+[Clonable]
+public partial struct SimpleStruct
+{
+    public string First { get; set; }
+    public int Second { get; set; }
+    [CloneIgnore]
+    public float DontClone { get; set; }
+}
+
+[Clonable]
+public partial class ComplexClass
+{
+    public SimpleClass ReferenceTypeNotNull { get; set; }
+    public SimpleClass? ReferenceTypeNull { get; set; }
+    public string StringReferenceTypeNotNull { get; set; }
+    public string? StringReferenceTypeNull { get; set; }
+    public SimpleStruct ValueTypeNotNull { get; set; }
+    public SimpleStruct? ValueTypeNull { get; set; }
+    public int IntValueTypeNotNull { get; set; }
+    public int? IntValueTypeNull { get; set; }
+}
+", name => name == "ComplexClass");
+        var expected = new Model("Dolly", "ComplexClass", ModelFlags.None, new Member[] {
+            new Member("ReferenceTypeNotNull", false, MemberFlags.Clonable),
+            new Member("ReferenceTypeNull", false, MemberFlags.Clonable | MemberFlags.MemberNullable),
+            new Member("StringReferenceTypeNotNull", false, MemberFlags.None),
+            new Member("StringReferenceTypeNull", false, MemberFlags.MemberNullable),
+
+            new Member("ValueTypeNotNull", false, MemberFlags.Clonable),
+            new Member("ValueTypeNull", false, MemberFlags.Clonable | MemberFlags.MemberNullable),
+            new Member("IntValueTypeNotNull", false, MemberFlags.None),
+            new Member("IntValueTypeNull", false, MemberFlags.MemberNullable)
+        }, EquatableArray<Member>.Empty());
+
+        await Assert.That(model).IsEquivalentTo(expected);
+    }
+
+    public async Task ClassFlags()
+    {
+
+    }
+
+    //Model modifiers
+    //Ignore attribute
+    //Ctor tests
 
     //[Test]
     //public async Task TestGenerator()

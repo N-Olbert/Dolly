@@ -10,16 +10,21 @@ namespace Dolly;
 public enum ModelFlags
 {
     None = 0,
-    Sealed = 1,
-    Record = 2,
-    Struct = 4,
-    ClonableBase = 8
+    Record = 1,
+    Struct = 2,
+    /// <summary>
+    /// Can never occur on struct as it can't be inherited
+    /// </summary>
+    ClonableBase = 4
+}
+
+public partial record struct Test
+{
 }
 
 [DebuggerDisplay("{Namespace}.{Name}")]
 public record Model(string Namespace, string Name, ModelFlags Flags, EquatableArray<Member> Members, EquatableArray<Member> Constructor)
 {
-    public bool IsSealed => Flags.HasFlag(ModelFlags.Sealed);
     public bool HasClonableBaseClass => Flags.HasFlag(ModelFlags.ClonableBase);
     public bool IsRecord => Flags.HasFlag(ModelFlags.Record);
     public bool IsStruct => Flags.HasFlag(ModelFlags.Struct);
@@ -31,7 +36,7 @@ public record Model(string Namespace, string Name, ModelFlags Flags, EquatableAr
         {
             return "override ";
         }
-        else if (!IsSealed && !HasClonableBaseClass)
+        else if (!HasClonableBaseClass && !IsStruct)
         {
             return "virtual ";
         }
@@ -44,10 +49,7 @@ public record Model(string Namespace, string Name, ModelFlags Flags, EquatableAr
     public string GetModifiers()
     {
         var builder = new StringBuilder();
-        if (IsSealed)
-        {
-            builder.Append("sealed ");
-        }
+        builder.Append("partial ");
         if (IsRecord)
         {
             builder.Append("record ");
@@ -111,10 +113,6 @@ public record Model(string Namespace, string Name, ModelFlags Flags, EquatableAr
     private static ModelFlags GetFlags(INamedTypeSymbol namedTypeSymbol)
     {
         var flags = ModelFlags.None;
-        if (namedTypeSymbol.IsSealed && !namedTypeSymbol.IsValueType)
-        {
-            flags |= ModelFlags.Sealed;
-        }
         if (namedTypeSymbol.IsRecord)
         {
             flags |= ModelFlags.Record;
