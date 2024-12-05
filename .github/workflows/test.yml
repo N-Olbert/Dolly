@@ -1,0 +1,51 @@
+name: unit tests
+
+on: [push, pull_request]
+
+jobs:
+  run-unit-tests:
+    env:
+      REPOSITORY_NAME: ${{ github.event.repository.name }}
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Setup .NET8
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 8.0.x
+
+    - uses: testspace-com/setup-testspace@v1
+      with:
+        domain: ${{github.repository_owner}}
+
+    - name: Cache dependencies
+      uses: actions/cache@v2
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+
+    - name: Install dependencies
+      run: dotnet restore --verbosity normal --locked-mode
+
+    - name: Build
+      run: dotnet build --configuration Release --no-restore
+
+    - name: Test
+      run: dotnet test --configuration Release --no-restore --no-build --verbosity normal -- --results-directory ./TestResults --report-trx --coverage --coverage-output-format cobertura --coverage-output tests.cobertura.xml --report-trx-filename tests.trx
+
+    - name: Publish coverage report to coveralls.io
+      uses: coverallsapp/github-action@v2
+      if: ${{ always() && github.event_name == 'push' }}
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        format: cobertura
+        file: ${{ env.REPOSITORY_NAME }}.Tests/TestResults/tests.cobertura.xml
+    
+    - name: Publish Results to Testspace
+      if: ${{ always() && github.event_name == 'push' }}
+      run: testspace ${{ env.REPOSITORY_NAME }}.Tests/TestResults/tests.trx
