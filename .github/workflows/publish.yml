@@ -32,7 +32,10 @@ jobs:
       run: dotnet restore --verbosity normal --locked-mode
     
     - name: Build
-      run: dotnet pack Dolly --configuration Release --no-restore /property:Version=${{ github.event.release.tag_name }}
+      run: dotnet build Dolly --configuration Release --no-restore /property:Version=${{ github.event.release.tag_name }}
+
+    - name: Pack
+      run: dotnet pack Dolly --configuration Release --no-restore --no-build /property:Version=${{ github.event.release.tag_name }}
 
     - name: NuGet Packages Artifacts
       uses: actions/upload-artifact@v4.4.3
