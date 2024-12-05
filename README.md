@@ -9,11 +9,11 @@
     Clone .net objects using source generation
     <br />
     <br />
-    ·
+    Â·
     <a href="https://github.com/AnderssonPeter/Dolly/issues">Report Bug</a>
-    ·
+    Â·
     <a href="https://github.com/AnderssonPeter/Dolly/issues">Request Feature</a>
-    ·
+    Â·
   </p>
 </p>
 <br />
@@ -21,6 +21,10 @@
 [![NuGet version](https://badge.fury.io/nu/Dolly.svg)](https://www.nuget.org/packages/Dolly)
 [![Nuget](https://img.shields.io/nuget/dt/Dolly)](https://www.nuget.org/packages/Dolly)
 [![GitHub license](https://img.shields.io/badge/license-Apache%202-blue.svg)](https://raw.githubusercontent.com/AnderssonPeter/Dolly/main/LICENSE)
+
+[![unit tests](https://img.shields.io/github/actions/workflow/status/AnderssonPeter/Dolly/test.yml?branch=main&style=flat-square&label=unit%20tests)](https://github.com/AnderssonPeter/Dolly/actions/workflows/test.yml)
+[![Testspace tests](https://img.shields.io/testspace/tests/AnderssonPeter/AnderssonPeter:Dolly/main?style=flat-square)](https://anderssonpeter.testspace.com/spaces/293120/result_sets)
+[![Coverage Status](https://img.shields.io/coveralls/github/AnderssonPeter/Dolly?style=flat-square)](https://coveralls.io/github/AnderssonPeter/Dolly)
 
 ## Table of Contents
 * [About the Project](#about-the-project)
@@ -33,7 +37,7 @@ Generate c# code to clone objects on the fly.
 ## Getting Started
 * Add the `Dolly` nuget and add `[Clonable]` attribute to a class and ensure that the class is marked as `partial`.
 * Add `[CloneIgnore]` to any property or field that you don't want to include in the clone.
-* Call `Clone()` or `ShallowClone()` on the object.
+* Call `DeepClone()` or `ShallowClone()` on the object.
 
 ### Example
 ```C#
@@ -51,9 +55,9 @@ Should generate
 partial class SimpleClass : IClonable<SimpleClass>
 {
     
-    object ICloneable.Clone() => this.Clone();
+    object ICloneable.Clone() => this.DeepClone();
 
-    public SimpleClass Clone() =>
+    public SimpleClass DeepClone() =>
         new SimpleClass()
         {
             First = First,
