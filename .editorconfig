@@ -11,6 +11,6 @@ indent_style = space
 [*.csproj,*.cs]
 trim_trailing_whitespace = true
 
-[*.md]
+[*.md, *.yml]
 indent_size = 2
 insert_final_newline = true

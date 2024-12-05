@@ -4,29 +4,22 @@
         <TargetFramework>netstandard2.0</TargetFramework>
         <LangVersion>latest</LangVersion>
         <Nullable>enable</Nullable>
-        <ImplicitUsings>enable</ImplicitUsings>
-        
+        <ImplicitUsings>enable</ImplicitUsings>        
         <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
         <IsRoslynComponent>true</IsRoslynComponent>
         <CompilerGeneratedFilesOutputPath>Generated</CompilerGeneratedFilesOutputPath>
         <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
         <DevelopmentDependency>true</DevelopmentDependency>
         <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <!-- Generates a package at build -->
-        <IncludeBuildOutput>false</IncludeBuildOutput>
-        <!-- Do not include the generator as a lib dependency -->
-        
+        <IncludeBuildOutput>false</IncludeBuildOutput>        
         <Description>Clone .net objects using source generation</Description>
         <PackageTags>Clone SourceGenerator</PackageTags>
         <Version>0.1.0</Version>
         <PackageProjectUrl>https://github.com/AnderssonPeter/Dolly</PackageProjectUrl>
         <RepositoryUrl>https://github.com/AnderssonPeter/Dolly</RepositoryUrl>
         <RepositoryType>github</RepositoryType>
-        <PackageReleaseNotes>0.1.0
-* Initial version
-        </PackageReleaseNotes>
+        <PackageReleaseNotes>https://github.com/AnderssonPeter/Dolly/releases</PackageReleaseNotes>
         <PackageLicenseFile>LICENSE</PackageLicenseFile>
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <PackageIcon>icon.png</PackageIcon>

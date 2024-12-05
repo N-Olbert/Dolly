@@ -393,7 +393,6 @@ public partial {{modifiers}} ComplexClass{{(hasClonableBase ? ": SimpleClass" : 
         await Assert.That(model.Flags).IsEquivalentTo(expected);
     }
 
-    //Model modifiers
     //Ignore attribute
     //Ctor tests
 

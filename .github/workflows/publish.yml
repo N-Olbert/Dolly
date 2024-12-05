@@ -1,0 +1,47 @@
+name: Publish
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  pack:
+    env:
+      REPOSITORY_NAME: ${{ github.event.repository.name }}
+      VERSION: ${{ github.event.release.tag_name }}
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Setup .NET 8
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 8.0.x
+    
+    - name: Cache dependencies
+      uses: actions/cache@v2
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+
+    - name: Install dependencies
+      run: dotnet restore --verbosity normal --locked-mode
+    
+    - name: Build
+      run: dotnet pack Dolly --configuration Release --no-restore /property:Version=${{ github.event.release.tag_name }}
+
+    - name: NuGet Packages Artifacts
+      uses: actions/upload-artifact@v4.4.3
+      if: always()
+      with:
+        name: 'nuget'
+        if-no-files-found: error
+        retention-days: 7
+        path: '**/*.*nupkg'
+
+    - name: Publish
+      run: dotnet nuget push Dolly\bin\Release\${{ env.REPOSITORY_NAME }}.${{ env.VERSION }}.nupkg --api-key "${{ secrets.NUGET_APIKEY }}"
