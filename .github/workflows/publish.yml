@@ -47,4 +47,4 @@ jobs:
         path: '**/*.*nupkg'
 
     - name: Publish
-      run: dotnet nuget "push Dolly/bin/Release/${{ env.REPOSITORY_NAME }}.${{ env.VERSION }}.nupkg" --api-key "${{ secrets.NUGET_APIKEY }}" --source https://api.nuget.org/v3/index.json
+      run: dotnet nuget push "Dolly/bin/Release/${{ env.REPOSITORY_NAME }}.${{ env.VERSION }}.nupkg" --api-key "${{ secrets.NUGET_APIKEY }}" --source https://api.nuget.org/v3/index.json
