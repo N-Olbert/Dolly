@@ -20,6 +20,7 @@ namespace Dolly;
  * X Structs
  * CloneConstructorAttribute
  * IClone
+ * Move interfaces and attributes to dependency to simplify cross assemlby usage
  */
 
 [Generator]
@@ -96,6 +97,7 @@ public partial class DollyGenerator : IIncrementalGenerator
             result.Handle(model =>
             {
                 var sourceText = SourceText.From($$"""
+                using Dolly;
                 using System.Linq;
                 namespace {{model.Namespace}};
                 {{model.GetModifiers()}} {{model.Name}} : IClonable<{{model.Name}}>
