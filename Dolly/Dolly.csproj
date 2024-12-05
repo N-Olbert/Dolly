@@ -14,7 +14,7 @@
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <IncludeBuildOutput>false</IncludeBuildOutput>        
         <Description>Clone .net objects using source generation</Description>
-        <PackageTags>Clone SourceGenerator</PackageTags>
+        <PackageTags>Clone Copy Duplicate SourceGenerator</PackageTags>
         <Version>0.1.0</Version>
         <PackageProjectUrl>https://github.com/AnderssonPeter/Dolly</PackageProjectUrl>
         <RepositoryUrl>https://github.com/AnderssonPeter/Dolly</RepositoryUrl>
