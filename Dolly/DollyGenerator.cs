@@ -21,6 +21,7 @@ namespace Dolly;
  * CloneConstructorAttribute
  * IClone
  * Move interfaces and attributes to dependency to simplify cross assemlby usage
+ * KeyValuePair
  */
 
 [Generator]
