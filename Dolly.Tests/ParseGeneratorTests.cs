@@ -29,6 +29,82 @@ public partial class SimpleClass
     }
 
     [Test]
+    public async Task ParseSimpleSealedClass()
+    {
+        var model = GetModel(@"
+namespace Dolly;
+[Clonable]
+public sealed partial class SimpleClass
+{
+    public string First { get; set; }
+    public int Second { get; set; }
+    [CloneIgnore]
+    public float DontClone { get; set; }
+}
+");
+        var generated = SourceTextConverter.ToSourceText(model);
+        var expected =
+            """
+            using Dolly;
+            using System.Linq;
+            namespace Dolly;
+            partial class SimpleClass : IClonable<SimpleClass>
+            {
+                object ICloneable.Clone() => this.DeepClone();
+                public SimpleClass DeepClone() =>
+                    new ()
+                    {
+                        First = First,
+                        Second = Second
+                    };
+
+                public SimpleClass ShallowClone() =>
+                    new ()
+                    {
+                        First = First,
+                        Second = Second
+                    };
+            }
+            """.Replace("\r\n", "\n");
+
+        await Assert.That(generated.ToString().Replace("\r\n", "\n")).IsEquivalentTo(expected);
+    }
+
+    [Test]
+    public async Task ParseSimpleSealedRecord()
+    {
+        var model = GetModel(@"
+namespace Dolly;
+[Clonable]
+public sealed partial record SimpleClass(string Foo);
+");
+        var generated = SourceTextConverter.ToSourceText(model);
+        var expected =
+            """
+            using Dolly;
+            using System.Linq;
+            namespace Dolly;
+            partial record SimpleClass : IClonable<SimpleClass>
+            {
+                object ICloneable.Clone() => this.DeepClone();
+                public SimpleClass DeepClone() =>
+                    new (Foo)
+                    {
+
+                    };
+
+                public SimpleClass ShallowClone() =>
+                    new (Foo)
+                    {
+
+                    };
+            }
+            """.Replace("\r\n", "\n");
+
+        await Assert.That(generated.ToString().Replace("\r\n", "\n")).IsEquivalentTo(expected);
+    }
+
+    [Test]
     public async Task ParseSimpleStruct()
     {
         var model = GetModel(@"
@@ -42,7 +118,7 @@ public partial struct SimpleStruct
     public float DontClone { get; set; }
 }
 ");
-        var expected = new Model("Dolly", "SimpleStruct", ModelFlags.Struct, new Member[] {
+        var expected = new Model("Dolly", "SimpleStruct", ModelFlags.Struct | ModelFlags.IsSealed, new Member[] {
             new Member("First", false, MemberFlags.None),
             new Member("Second", false, MemberFlags.None)
         }, EquatableArray<Member>.Empty());
@@ -369,9 +445,9 @@ public partial class ComplexClass
     [Test]
     [Arguments("class", false, ModelFlags.None)]
     [Arguments("record", false, ModelFlags.Record)]
-    [Arguments("record struct", false, ModelFlags.Record | ModelFlags.Struct)]
+    [Arguments("record struct", false, ModelFlags.Record | ModelFlags.Struct | ModelFlags.IsSealed)]
     [Arguments("record", true, ModelFlags.Record | ModelFlags.ClonableBase)]
-    [Arguments("struct", false, ModelFlags.Struct)]
+    [Arguments("struct", false, ModelFlags.Struct | ModelFlags.IsSealed)]
     // [Arguments("struct", true, ModelFlags.Struct | ModelFlags.ClonableBase)] // Cannot occur
     [Arguments("class", true, ModelFlags.ClonableBase)]
     public async Task ParseModelFlags(string modifiers, bool hasClonableBase, ModelFlags expected)
