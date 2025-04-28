@@ -12,6 +12,7 @@ public class ModelTests
     [Arguments(ModelFlags.Struct, "partial struct")]
     [Arguments(ModelFlags.Struct | ModelFlags.ClonableBase, "partial struct")] // Cannot occur
     [Arguments(ModelFlags.ClonableBase, "partial class")]
+    [Arguments(ModelFlags.Record | ModelFlags.IsSealed, "partial record")]
     public async Task Modifiers(ModelFlags flags, string expected)
     {
         var model = new Model("test", "test", flags, [], []);
@@ -24,6 +25,7 @@ public class ModelTests
     [Arguments(ModelFlags.Struct, "")]
     [Arguments(ModelFlags.Struct | ModelFlags.ClonableBase, "override")] // Cannot occur
     [Arguments(ModelFlags.ClonableBase, "override")]
+    [Arguments(ModelFlags.IsSealed, "")]
     public async Task MethodModifiers(ModelFlags flags, string expected)
     {
         var model = new Model("test", "test", flags, [], []);

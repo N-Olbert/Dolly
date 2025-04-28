@@ -97,27 +97,7 @@ public partial class DollyGenerator : IIncrementalGenerator
         {
             result.Handle(model =>
             {
-                var sourceText = SourceText.From($$"""
-                using Dolly;
-                using System.Linq;
-                namespace {{model.Namespace}};
-                {{model.GetModifiers()}} {{model.Name}} : IClonable<{{model.Name}}>
-                {
-                    {{(!model.HasClonableBaseClass ? "object ICloneable.Clone() => this.DeepClone();" : "")}}
-                    public {{model.GetMethodModifiers()}}{{model.Name}} DeepClone() =>
-                        new ({{string.Join(", ", model.Constructor.Select(m => m.ToString(true)))}})
-                        {
-                {{GenerateCloneMembers(model, true)}}
-                        };
-
-                    public {{model.GetMethodModifiers()}}{{model.Name}} ShallowClone() =>
-                        new ({{string.Join(", ", model.Constructor.Select(m => m.ToString(false)))}})
-                        {
-                {{GenerateCloneMembers(model, false)}}
-                        };
-                }
-                """.Replace("\r\n", "\n"), Encoding.UTF8);
-
+                var sourceText = SourceTextConverter.ToSourceText(model);
                 context.AddSource($"{model.Name}.g.cs", sourceText);
             },
             error =>
@@ -126,10 +106,4 @@ public partial class DollyGenerator : IIncrementalGenerator
             });
         });
     }
-
-    private static string GenerateCloneMembers(Model model, bool deepClone) =>
-        string.Join(",\n",
-            model.Members
-            .Select(m => $"{new string(' ', 12)}{m.Name} = {m.ToString(deepClone)}")
-        );
 }

@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Text;
 
 namespace Dolly;
 
@@ -15,7 +16,8 @@ public enum ModelFlags
     /// <summary>
     /// Can never occur on struct as it can't be inherited
     /// </summary>
-    ClonableBase = 4
+    ClonableBase = 4,
+    IsSealed = 8,
 }
 
 public partial record struct Test
@@ -28,6 +30,7 @@ public record Model(string Namespace, string Name, ModelFlags Flags, EquatableAr
     public bool HasClonableBaseClass => Flags.HasFlag(ModelFlags.ClonableBase);
     public bool IsRecord => Flags.HasFlag(ModelFlags.Record);
     public bool IsStruct => Flags.HasFlag(ModelFlags.Struct);
+    public bool IsSealed => Flags.HasFlag(ModelFlags.IsSealed);
     public bool IsStructRecord => IsRecord && IsStruct;
 
     public string GetMethodModifiers()
@@ -36,7 +39,7 @@ public record Model(string Namespace, string Name, ModelFlags Flags, EquatableAr
         {
             return "override ";
         }
-        else if (!HasClonableBaseClass && !IsStruct)
+        else if (!HasClonableBaseClass && !IsStruct && !IsSealed)
         {
             return "virtual ";
         }
@@ -117,13 +120,20 @@ public record Model(string Namespace, string Name, ModelFlags Flags, EquatableAr
         {
             flags |= ModelFlags.Record;
         }
+
         if (namedTypeSymbol.IsValueType)
         {
             flags |= ModelFlags.Struct;
         }
+
         if (namedTypeSymbol.RecursiveFlatten(t => t.BaseType).Skip(1).Any(t => t.IsClonable()))
         {
             flags |= ModelFlags.ClonableBase;
+        }
+
+        if (namedTypeSymbol.IsSealed)
+        {
+            flags |= ModelFlags.IsSealed;
         }
 
         return flags;
