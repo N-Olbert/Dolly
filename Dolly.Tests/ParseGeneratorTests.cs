@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Text;
 using System.Xml.Linq;
@@ -340,9 +341,9 @@ public class ParseGeneratorTests
         await Assert.That(complexClassModel.Flags).IsEquivalentTo(expected);
     }
 
-    private void VerifyGeneratedCode(string sourceCode) => VerifyGeneratedCode(sourceCode, out _);
+    private void VerifyGeneratedCode([StringSyntax("c#-test")] string sourceCode) => VerifyGeneratedCode(sourceCode, out _);
 
-    private void VerifyGeneratedCode(string sourceCode, out IReadOnlyCollection<Model> models)
+    private void VerifyGeneratedCode([StringSyntax("c#-test")] string sourceCode, out IReadOnlyCollection<Model> models)
     {
         var stringBuilder = new StringBuilder();
         models = GetModels(sourceCode).ToArray();
