@@ -1,0 +1,37 @@
+﻿using Dolly;
+using System.Linq;
+namespace Dolly;
+partial record SimpleClass : IClonable<SimpleClass>
+{
+    object ICloneable.Clone() => this.DeepClone();
+    public virtual SimpleClass DeepClone() =>
+        new ()
+        {
+
+        };
+
+    public virtual SimpleClass ShallowClone() =>
+        new ()
+        {
+
+        };
+}
+
+using Dolly;
+using System.Linq;
+namespace Dolly;
+partial record ComplexClass : IClonable<ComplexClass>
+{
+    
+    public override ComplexClass DeepClone() =>
+        new ()
+        {
+
+        };
+
+    public override ComplexClass ShallowClone() =>
+        new ()
+        {
+
+        };
+}

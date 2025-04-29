@@ -1,0 +1,37 @@
+﻿using Dolly;
+using System.Linq;
+namespace Dolly;
+partial record struct SimpleClass : IClonable<SimpleClass>
+{
+    object ICloneable.Clone() => this.DeepClone();
+    public SimpleClass DeepClone() =>
+        new ()
+        {
+
+        };
+
+    public SimpleClass ShallowClone() =>
+        new ()
+        {
+
+        };
+}
+
+using Dolly;
+using System.Linq;
+namespace Dolly;
+partial record struct ComplexClass : IClonable<ComplexClass>
+{
+    object ICloneable.Clone() => this.DeepClone();
+    public ComplexClass DeepClone() =>
+        new ()
+        {
+
+        };
+
+    public ComplexClass ShallowClone() =>
+        new ()
+        {
+
+        };
+}

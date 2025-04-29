@@ -1,0 +1,20 @@
+﻿using Dolly;
+using System.Linq;
+namespace Dolly;
+partial struct SimpleStruct : IClonable<SimpleStruct>
+{
+    object ICloneable.Clone() => this.DeepClone();
+    public SimpleStruct DeepClone() =>
+        new ()
+        {
+            First = First,
+            Second = Second
+        };
+
+    public SimpleStruct ShallowClone() =>
+        new ()
+        {
+            First = First,
+            Second = Second
+        };
+}

@@ -12,7 +12,8 @@
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.SourceGenerators.Testing" Version="1.1.2" />
     <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" Version="17.13.1" />
     <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" Version="1.4.3" />
-    <PackageReference Include="TUnit" Version="0.4.74" />
+    <PackageReference Include="Snapshooter.TUnit" Version="1.0.1" />
+    <PackageReference Include="TUnit" Version="0.19.86" />
   </ItemGroup>
 
   <ItemGroup>

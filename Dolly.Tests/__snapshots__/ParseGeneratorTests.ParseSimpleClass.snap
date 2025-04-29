@@ -1,0 +1,20 @@
+﻿using Dolly;
+using System.Linq;
+namespace Dolly;
+partial class SimpleClass : IClonable<SimpleClass>
+{
+    object ICloneable.Clone() => this.DeepClone();
+    public virtual SimpleClass DeepClone() =>
+        new ()
+        {
+            First = First,
+            Second = Second
+        };
+
+    public virtual SimpleClass ShallowClone() =>
+        new ()
+        {
+            First = First,
+            Second = Second
+        };
+}
