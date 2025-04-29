@@ -1,17 +1,16 @@
-﻿using Dolly;
-using System.Linq;
+﻿using global::System.Linq;
 namespace Dolly;
-partial class SimpleClass : IClonable<SimpleClass>
+partial class SimpleClass : global::Dolly.IClonable<SimpleClass>
 {
-    object ICloneable.Clone() => this.DeepClone();
-    public virtual SimpleClass DeepClone() =>
+    object global::System.ICloneable.Clone() => this.DeepClone();
+    public virtual global::Dolly.SimpleClass DeepClone() =>
         new ()
         {
             First = First,
             Second = Second
         };
 
-    public virtual SimpleClass ShallowClone() =>
+    public virtual global::Dolly.SimpleClass ShallowClone() =>
         new ()
         {
             First = First,
@@ -19,20 +18,19 @@ partial class SimpleClass : IClonable<SimpleClass>
         };
 }
 
-using Dolly;
-using System.Linq;
+using global::System.Linq;
 namespace Dolly;
-partial struct SimpleStruct : IClonable<SimpleStruct>
+partial struct SimpleStruct : global::Dolly.IClonable<SimpleStruct>
 {
-    object ICloneable.Clone() => this.DeepClone();
-    public SimpleStruct DeepClone() =>
+    object global::System.ICloneable.Clone() => this.DeepClone();
+    public global::Dolly.SimpleStruct DeepClone() =>
         new ()
         {
             First = First,
             Second = Second
         };
 
-    public SimpleStruct ShallowClone() =>
+    public global::Dolly.SimpleStruct ShallowClone() =>
         new ()
         {
             First = First,
@@ -40,13 +38,12 @@ partial struct SimpleStruct : IClonable<SimpleStruct>
         };
 }
 
-using Dolly;
-using System.Linq;
+using global::System.Linq;
 namespace Dolly;
-partial class ComplexClass : IClonable<ComplexClass>
+partial class ComplexClass : global::Dolly.IClonable<ComplexClass>
 {
-    object ICloneable.Clone() => this.DeepClone();
-    public virtual ComplexClass DeepClone() =>
+    object global::System.ICloneable.Clone() => this.DeepClone();
+    public virtual global::Dolly.ComplexClass DeepClone() =>
         new ()
         {
             ReferenceTypeNotNull = ReferenceTypeNotNull.DeepClone(),
@@ -59,7 +56,7 @@ partial class ComplexClass : IClonable<ComplexClass>
             IntValueTypeNull = IntValueTypeNull
         };
 
-    public virtual ComplexClass ShallowClone() =>
+    public virtual global::Dolly.ComplexClass ShallowClone() =>
         new ()
         {
             ReferenceTypeNotNull = ReferenceTypeNotNull,

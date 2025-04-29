@@ -1,5 +1,6 @@
 using System.Reflection;
 using System.Text;
+using System.Xml.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -339,7 +340,8 @@ public class ParseGeneratorTests
         await Assert.That(complexClassModel.Flags).IsEquivalentTo(expected);
     }
 
-    private void VerifyGeneratedCode(string sourceCode) => VerifyGeneratedCode(sourceCode, out var _);
+    private void VerifyGeneratedCode(string sourceCode) => VerifyGeneratedCode(sourceCode, out _);
+
     private void VerifyGeneratedCode(string sourceCode, out IReadOnlyCollection<Model> models)
     {
         var stringBuilder = new StringBuilder();
@@ -355,7 +357,8 @@ public class ParseGeneratorTests
             stringBuilder.AppendLine(generatedSourceText.ToString());
         }
 
-        stringBuilder.Replace("\r\n", "\n").ToString().MatchSnapshot();
+        var generatedCode = stringBuilder.Replace("\r\n", "\n").ToString();
+        generatedCode.MatchSnapshot();
     }
 
     private static Compilation CreateCompilation(string source, bool addAttributes)
@@ -375,25 +378,23 @@ public class ParseGeneratorTests
     {
         var compilation = CreateCompilation(code, true);
         var diagnostics = compilation.GetDiagnostics().Where(d => d.Severity == DiagnosticSeverity.Error);
+
         if (diagnostics.Any())
         {
-            throw new Exception("Failed to compile code, errors:" + string.Join(", ", diagnostics));
+            throw new Exception("Failed to compile code, errors: " + string.Join(", ", diagnostics));
         }
 
         var syntaxTree = compilation.SyntaxTrees.Single(syntaxTree => syntaxTree.FilePath == "");
-
         var semanticModel = compilation.GetSemanticModel(syntaxTree);
 
-        var rootNodes = syntaxTree
+        var typeDeclarationNodes = syntaxTree
             .GetRoot()
             .RecursiveFlatten(n => n.ChildNodes())
-            .Where(node =>
-            (node is ClassDeclarationSyntax classNode && (filter == null || filter(classNode.Identifier.Text))) ||
-            (node is RecordDeclarationSyntax recordNode && (filter == null || filter(recordNode.Identifier.Text))) ||
-            (node is StructDeclarationSyntax structNode && (filter == null || filter(structNode.Identifier.Text))));
-        foreach (var node in rootNodes)
+            .Where(node => node is TypeDeclarationSyntax typeNode && (filter == null || filter(typeNode.Identifier.Text)));
+
+        foreach (var typeDeclarationNode in typeDeclarationNodes)
         {
-            var symbol = semanticModel.GetDeclaredSymbol(node);
+            var symbol = semanticModel.GetDeclaredSymbol(typeDeclarationNode);
             if (symbol is INamedTypeSymbol namedTypeSymbol)
             {
                 if (Model.TryCreate(namedTypeSymbol, true, out var model, out var error))
@@ -407,9 +408,9 @@ public class ParseGeneratorTests
             }
         }
 
-        if (!rootNodes.Any())
+        if (!typeDeclarationNodes.Any())
         {
-            throw new Exception("Symbol is not of type INamedTypeSymbol");
+            throw new Exception("No valid type declarations found in the provided code.");
         }
     }
 }

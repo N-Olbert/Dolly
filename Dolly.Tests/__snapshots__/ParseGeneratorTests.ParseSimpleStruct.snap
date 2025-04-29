@@ -1,17 +1,16 @@
-﻿using Dolly;
-using System.Linq;
+﻿using global::System.Linq;
 namespace Dolly;
-partial struct SimpleStruct : IClonable<SimpleStruct>
+partial struct SimpleStruct : global::Dolly.IClonable<SimpleStruct>
 {
-    object ICloneable.Clone() => this.DeepClone();
-    public SimpleStruct DeepClone() =>
+    object global::System.ICloneable.Clone() => this.DeepClone();
+    public global::Dolly.SimpleStruct DeepClone() =>
         new ()
         {
             First = First,
             Second = Second
         };
 
-    public SimpleStruct ShallowClone() =>
+    public global::Dolly.SimpleStruct ShallowClone() =>
         new ()
         {
             First = First,

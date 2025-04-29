@@ -1,35 +1,33 @@
-﻿using Dolly;
-using System.Linq;
+﻿using global::System.Linq;
 namespace Dolly;
-partial class SimpleClass : IClonable<SimpleClass>
+partial class SimpleClass : global::Dolly.IClonable<SimpleClass>
 {
-    object ICloneable.Clone() => this.DeepClone();
-    public virtual SimpleClass DeepClone() =>
+    object global::System.ICloneable.Clone() => this.DeepClone();
+    public virtual global::Dolly.SimpleClass DeepClone() =>
         new ()
         {
 
         };
 
-    public virtual SimpleClass ShallowClone() =>
+    public virtual global::Dolly.SimpleClass ShallowClone() =>
         new ()
         {
 
         };
 }
 
-using Dolly;
-using System.Linq;
+using global::System.Linq;
 namespace Dolly;
-partial class ComplexClass : IClonable<ComplexClass>
+partial class ComplexClass : global::Dolly.IClonable<ComplexClass>
 {
-    object ICloneable.Clone() => this.DeepClone();
-    public virtual ComplexClass DeepClone() =>
+    object global::System.ICloneable.Clone() => this.DeepClone();
+    public virtual global::Dolly.ComplexClass DeepClone() =>
         new ()
         {
 
         };
 
-    public virtual ComplexClass ShallowClone() =>
+    public virtual global::Dolly.ComplexClass ShallowClone() =>
         new ()
         {
 
