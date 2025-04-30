@@ -42,13 +42,13 @@ jobs:
       uses: actions/upload-artifact@v4  
       with:  
         name: TestResults  
-        path: ./TestResults/tests.trx  
+        path: ./Dolly.Tests/TestResults/tests.trx  
     
     - name: Upload Coverage Report  
       uses: actions/upload-artifact@v4  
       with:  
         name: CoverageReport  
-        path: ./tests.cobertura.xml  
+        path: ./Dolly.Tests/tests.cobertura.xml  
 
     #- name: Publish coverage report to coveralls.io
      # uses: coverallsapp/github-action@v2
