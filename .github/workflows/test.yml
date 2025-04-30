@@ -1,6 +1,6 @@
 name: unit tests
 
-on: [push, pull_request, workflow_dispatch]
+on: [push, pull_request]
 
 jobs:
   run-unit-tests:
@@ -17,9 +17,9 @@ jobs:
       with:
         dotnet-version: 8.0.x
 
-    #- uses: testspace-com/setup-testspace@v1
-    # with:
-    #  domain: ${{github.repository_owner}}
+    - uses: testspace-com/setup-testspace@v1
+      with:
+        domain: ${{github.repository_owner}}
 
     - name: Cache dependencies
       uses: actions/cache@v4
