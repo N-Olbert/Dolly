@@ -1,51 +1,52 @@
-name: unit tests
+steps:  
+   - uses: actions/checkout@v2  
 
-on: [push, pull_request, workflow_dispatch]
+   - name: Setup .NET8  
+     uses: actions/setup-dotnet@v1  
+     with:  
+       dotnet-version: 8.0.x  
 
-jobs:
-  run-unit-tests:
-    env:
-      REPOSITORY_NAME: ${{ github.event.repository.name }}
+   #- uses: testspace-com/setup-testspace@v1  
+   # with:  
+   #  domain: ${{github.repository_owner}}  
 
-    runs-on: ubuntu-latest
+   - name: Cache dependencies  
+     uses: actions/cache@v4  
+     with:  
+       path: ~/.nuget/packages  
+       key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}  
+       restore-keys: |  
+         ${{ runner.os }}-nuget-  
 
-    steps:
-    - uses: actions/checkout@v2
+   - name: Install dependencies  
+     run: dotnet restore --verbosity normal --locked-mode  
 
-    - name: Setup .NET8
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 8.0.x
+   - name: Build  
+     run: dotnet build --configuration Release --no-restore  
 
-    #- uses: testspace-com/setup-testspace@v1
-    # with:
-    #  domain: ${{github.repository_owner}}
+   - name: Test  
+     run: dotnet test --configuration Release --no-restore --no-build --verbosity normal -- --results-directory ./TestResults --report-trx --coverage --coverage-output-format cobertura --coverage-output tests.cobertura.xml --report-trx-filename tests.trx  
 
-    - name: Cache dependencies
-      uses: actions/cache@v4
-      with:
-        path: ~/.nuget/packages
-        key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
-        restore-keys: |
-          ${{ runner.os }}-nuget-
+   - name: Upload Test Results  
+     uses: actions/upload-artifact@v3  
+     with:  
+       name: TestResults  
+       path: ./TestResults/tests.trx  
 
-    - name: Install dependencies
-      run: dotnet restore --verbosity normal --locked-mode
+   - name: Upload Coverage Report  
+     uses: actions/upload-artifact@v3  
+     with:  
+       name: CoverageReport  
+       path: ./tests.cobertura.xml  
 
-    - name: Build
-      run: dotnet build --configuration Release --no-restore
+   #- name: Publish coverage report to coveralls.io  
+    # uses: coverallsapp/github-action@v2  
+    # if: ${{ always() && github.event_name == 'push' }}  
+    # with:  
+    #   github-token: ${{ secrets.GITHUB_TOKEN }}  
+    #   format: cobertura  
+    #   file: ${{ env.REPOSITORY_NAME }}.Tests/TestResults/tests.cobertura.xml  
 
-    - name: Test
-      run: dotnet test --configuration Release --no-restore --no-build --verbosity normal -- --results-directory ./TestResults --report-trx --coverage --coverage-output-format cobertura --coverage-output tests.cobertura.xml --report-trx-filename tests.trx
-
-    #- name: Publish coverage report to coveralls.io
-     # uses: coverallsapp/github-action@v2
-     # if: ${{ always() && github.event_name == 'push' }}
-     # with:
-     #   github-token: ${{ secrets.GITHUB_TOKEN }}
-     #   format: cobertura
-     #   file: ${{ env.REPOSITORY_NAME }}.Tests/TestResults/tests.cobertura.xml
-    
-    #- name: Publish Results to Testspace
-    #  if: ${{ always() && github.event_name == 'push' }}
-    #  run: testspace ${{ env.REPOSITORY_NAME }}.Tests/TestResults/tests.trx
+   #- name: Publish Results to Testspace  
+   #  if: ${{ always() && github.event_name == 'push' }}  
+   #  run: testspace ${{ env.REPOSITORY_NAME }}.Tests/TestResults/tests.trx
