@@ -12,7 +12,7 @@ namespace Dolly.Tests;
 public class ParseGeneratorTests
 {
     [Test]
-    public async Task ParseSimpleClass()
+    public void ParseSimpleClass()
     {
         var sourceCode = """
             namespace Dolly;
@@ -30,7 +30,7 @@ public class ParseGeneratorTests
     }
 
     [Test]
-    public async Task ParseSimpleSealedClass()
+    public void ParseSimpleSealedClass()
     {
         var sourceCode = """
             namespace Dolly;
@@ -48,7 +48,7 @@ public class ParseGeneratorTests
     }
 
     [Test]
-    public async Task ParseSimpleSealedRecord()
+    public void ParseSimpleSealedRecord()
     {
         var sourceCode = """
             namespace Dolly;
@@ -61,7 +61,7 @@ public class ParseGeneratorTests
     }
 
     [Test]
-    public async Task ParseSimpleStruct()
+    public void ParseSimpleStruct()
     {
         var sourceCode = """
             namespace Dolly;
@@ -79,7 +79,7 @@ public class ParseGeneratorTests
     }
 
     [Test]
-    public async Task ParseCollectionsNotNullable()
+    public void ParseCollectionsNotNullable()
     {
         var sourceCode = """
             using System.Collections.Generic;
@@ -127,7 +127,7 @@ public class ParseGeneratorTests
     }
 
     [Test]
-    public async Task ParseCollectionMemberNullable()
+    public void ParseCollectionMemberNullable()
     {
         var sourceCode = """
             using System.Collections.Generic;
@@ -175,7 +175,7 @@ public class ParseGeneratorTests
     }
 
     [Test]
-    public async Task ParseCollectionElementNullable()
+    public void ParseCollectionElementNullable()
     {
         var sourceCode = """
             using System.Collections.Generic;
@@ -223,7 +223,7 @@ public class ParseGeneratorTests
     }
 
     [Test]
-    public async Task ParseCollectionMemberAndElementNullable()
+    public void ParseCollectionMemberAndElementNullable()
     {
         var sourceCode = """
             using System.Collections.Generic;
@@ -271,7 +271,7 @@ public class ParseGeneratorTests
     }
 
     [Test]
-    public async Task ParseNullable()
+    public void ParseNullable()
     {
         var sourceCode = """
             using System.Collections.Generic;
