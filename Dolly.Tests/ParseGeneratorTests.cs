@@ -5,7 +5,6 @@ using System.Xml.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Mono.Cecil.Cil;
 using Snapshooter.TUnit;
 
 namespace Dolly.Tests;
